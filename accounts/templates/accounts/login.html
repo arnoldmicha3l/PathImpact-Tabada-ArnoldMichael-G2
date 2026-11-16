@@ -1,0 +1,31 @@
+{% extends "accounts/base.html" %}
+{% block title %}Log in{% endblock %}
+{% block body_class %}auth{% endblock %}
+{% block shell %}
+<div class="auth-wrap">
+    <section class="auth-hero">
+        <a class="logo" href="{% url 'home' %}"><span class="logo-mark">◆</span><span>Path<b>Impact</b></span></a>
+        <h1>Your passion.<br><span class="grad">Their future.</span></h1>
+        <p>Find volunteer opportunities that match your skills, apply in minutes and watch your impact grow.</p>
+        <ul class="hero-points">
+            <li>🌍 Discover causes near you</li><li>⚡ One-click, validated applications</li><li>📈 Track every approval in real time</li>
+        </ul>
+        <div class="hero-orbs"><span></span><span></span><span></span></div>
+    </section>
+    <section class="auth-panel">
+        <div class="auth-card">
+            {% include "accounts/_messages.html" %}
+            <h2>Welcome back 👋</h2>
+            <p class="muted">Log in to continue your journey.</p>
+            {% if form.errors %}<div class="toast error"><span class="ico">⛔</span><span>Invalid username or password. Please try again.</span></div>{% endif %}
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="field"><label for="{{ form.username.id_for_label }}">Username</label>{{ form.username }}</div>
+                <div class="field"><label for="{{ form.password.id_for_label }}">Password</label>{{ form.password }}</div>
+                <button class="btn btn-block" type="submit">Log in →</button>
+            </form>
+            <p class="switch">New here? <a href="{% url 'accounts:register' %}">Create an account</a></p>
+        </div>
+    </section>
+</div>
+{% endblock %}
