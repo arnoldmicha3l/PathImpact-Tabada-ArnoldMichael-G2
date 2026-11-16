@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Create an account | PathImpact</title>
+</head>
+<body>
+    <main>
+        <h1>Create your PathImpact account</h1>
+
+        {% for message in messages %}
+            <p role="status">{{ message }}</p>
+        {% endfor %}
+
+        {% if form.errors %}
+            <p role="alert">Please correct the errors below.</p>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Create account</button>
+        </form>
+    </main>
+</body>
+</html>
