@@ -1,0 +1,8 @@
+{% extends "accounts/base.html" %}
+{% block title %}Rate competencies · PathImpact{% endblock %}
+{% block content %}
+<header class="intro"><p class="eyebrow">DATABASE FOUNDATIONS / PROTOTYPE</p><h1>{% if attempt %}Edit self-assessment{% else %}Rate your current understanding{% endif %}</h1><p>Choose one rating for each competency. These are self-ratings, not grades or a readiness prediction.</p></header>
+<section class="card narrow"><h2>Competency ratings</h2><p>All ratings are required. The scale ranges from 1 (need a walkthrough) to 5 (can explain the skill).</p>
+<form method="post" novalidate>{% csrf_token %}{{ form.as_p }}<div class="form-actions"><button type="submit">Save self-assessment</button><a class="btn quiet" href="{% if attempt %}{% url 'assessment_detail' attempt.pk %}{% else %}{% url 'assessment_index' %}{% endif %}">Cancel</a></div></form>
+</section>
+{% endblock %}
