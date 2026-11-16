@@ -1,0 +1,13 @@
+{% extends "accounts/base.html" %}
+{% block title %}Edit profile{% endblock %}
+{% block content %}
+<section class="card narrow">
+    <h1>Edit profile</h1>
+    <p class="muted">Keep your details up to date.</p>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% for field in form %}{% include "accounts/_field.html" %}{% endfor %}
+        <div class="actions"><button class="btn" type="submit">Save changes</button><a class="btn btn-light" href="{% url 'accounts:profile' %}">Cancel</a></div>
+    </form>
+</section>
+{% endblock %}

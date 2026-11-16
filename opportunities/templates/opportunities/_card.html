@@ -1,0 +1,21 @@
+<article class="opp card hover cat-{{ opp.category }}" style="--i:{{ forloop.counter0 }}">
+    <div class="opp-top"><span class="opp-ico">{{ opp.icon }}</span><span class="chip">{{ opp.get_category_display }}</span>
+        {% if opp.status == 'closed' %}<span class="status rejected">Closed</span>{% endif %}</div>
+    <h3><a href="{% url 'opportunities:detail' opp.pk %}">{{ opp.title }}</a></h3>
+    <p class="muted clamp">{{ opp.description|truncatechars:120 }}</p>
+    <ul class="meta">
+        <li>📍 {{ opp.location }}</li>
+        <li>🗓 {{ opp.event_date|date:"M d, Y" }}</li>
+        <li>⏰ Apply by {{ opp.deadline|date:"M d" }}</li>
+    </ul>
+    <div class="slots"><div class="bar"><i style="width:{{ opp.fill_percent }}%"></i></div>
+        <span class="small muted">{{ opp.slots_left }} of {{ opp.slots }} slots left</span></div>
+    <div class="actions">
+        <a class="btn btn-sm" href="{% url 'opportunities:detail' opp.pk %}">View details</a>
+        {% if is_admin %}
+            <a class="btn btn-sm btn-light" href="{% url 'opportunities:edit' opp.pk %}">Edit</a>
+        {% elif opp.pk in applied_ids %}
+            <span class="status approved">Applied ✓</span>
+        {% endif %}
+    </div>
+</article>

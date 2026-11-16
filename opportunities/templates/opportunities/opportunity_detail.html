@@ -1,0 +1,49 @@
+{% extends "accounts/base.html" %}
+{% block title %}{{ opp.title }}{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'opportunities:list' %}">← All opportunities</a>
+<section class="detail-hero cat-{{ opp.category }}">
+    <div class="opp-ico big">{{ opp.icon }}</div>
+    <div>
+        <span class="chip">{{ opp.get_category_display }}</span>
+        <span class="status {% if opp.is_accepting %}approved{% else %}rejected{% endif %}">{% if opp.is_accepting %}Accepting applications{% else %}Not accepting{% endif %}</span>
+        <h1>{{ opp.title }}</h1>
+        <p>📍 {{ opp.location }} &nbsp;·&nbsp; 🗓 {{ opp.event_date|date:"l, F j, Y" }}</p>
+    </div>
+</section>
+<div class="two-col">
+    <section class="card">
+        <h2>About this opportunity</h2>
+        <p class="prose">{{ opp.description|linebreaksbr }}</p>
+        {% if is_admin %}
+        <div class="actions">
+            <a class="btn btn-light" href="{% url 'opportunities:edit' opp.pk %}">✏️ Edit</a>
+            <a class="btn btn-light" href="{% url 'opportunities:review_list' %}?opportunity={{ opp.pk }}">📥 Applications ({{ opp.applications.count }})</a>
+            <a class="btn btn-danger" href="{% url 'opportunities:delete' opp.pk %}">🗑 Delete</a>
+        </div>
+        {% endif %}
+    </section>
+    <aside class="card sticky">
+        <h3>Volunteer slots</h3>
+        <div class="ring" style="--p:{{ opp.fill_percent }}"><b>{{ opp.approved_count }}</b><span>/ {{ opp.slots }}</span></div>
+        <p class="center muted small">{{ opp.slots_left }} slot{{ opp.slots_left|pluralize }} remaining</p>
+        <ul class="meta">
+            <li>⏰ Deadline: <b>{{ opp.deadline|date:"M d, Y" }}</b></li>
+            <li>👤 Posted by {{ opp.created_by.username }}</li>
+        </ul>
+        {% if not is_admin %}
+            {% if my_application %}
+                <div class="status-track {{ my_application.status }}">
+                    <div class="step done">Sent</div><div class="step {% if my_application.status != 'pending' %}done{% endif %}">Reviewed</div>
+                    <div class="step {% if my_application.status == 'approved' %}done ok{% elif my_application.status == 'rejected' %}done bad{% endif %}">{{ my_application.get_status_display }}</div>
+                </div>
+                <a class="btn btn-block btn-light" href="{% url 'opportunities:my_applications' %}">View my application</a>
+            {% elif opp.is_accepting %}
+                <a class="btn btn-block" href="{% url 'opportunities:apply' opp.pk %}">Apply now →</a>
+            {% else %}
+                <div class="toast error"><span>{{ opp.closed_reason }}</span></div>
+            {% endif %}
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}
