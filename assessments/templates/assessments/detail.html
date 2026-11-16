@@ -1,0 +1,8 @@
+{% extends "accounts/base.html" %}
+{% block title %}Saved attempt · PathImpact{% endblock %}
+{% block content %}
+<header class="intro"><p class="eyebrow">PRIVATE SELF-ASSESSMENT</p><h1>Attempt {{ attempt.pk }}</h1><p>Completed {{ attempt.completed_at|date:"M j, Y · g:i A" }}. Your responses are saved to your account.</p></header>
+<section class="card narrow"><h2>Your self-ratings</h2><dl>
+{% for response in responses %}<dt>{{ response.subject_competency.competency.name }}</dt><dd>{{ response.get_self_rating_display }}</dd>{% endfor %}
+</dl><div class="form-actions"><a class="btn" href="{% url 'assessment_edit' attempt.pk %}">Edit ratings</a><a class="btn quiet" href="{% url 'assessment_delete' attempt.pk %}">Delete attempt</a><a href="{% url 'assessment_index' %}">Back to history</a></div></section>
+{% endblock %}

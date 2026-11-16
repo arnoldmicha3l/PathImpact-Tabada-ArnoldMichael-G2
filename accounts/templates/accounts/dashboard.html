@@ -1,3 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title|default:"Dashboard" }} | PathImpact</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f7f4ec;
+      color: #18223b;
+      font: 1rem/1.6 system-ui, sans-serif;
+    }
+    main { width: min(58rem, calc(100% - 2rem)); margin: 3rem auto; }
+    nav {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #d7d2c5;
+    }
+    nav strong { margin-right: auto; }
+    h1, h2 { font-family: Georgia, serif; line-height: 1.15; }
+    h1 { font-size: clamp(2.4rem, 7vw, 4.5rem); margin: .4rem 0 1rem; }
+    .label {
+      color: #49546a;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .card {
+      margin-top: 2rem;
+      padding: clamp(1.25rem, 5vw, 2.5rem);
+      background: #fffdf8;
+      border: 1px solid #d7d2c5;
+      border-left: .35rem solid #193eb1;
+    }
+    .card h2 { margin: .4rem 0; }
+    a { color: #193eb1; }
+    .button, button {
+      display: inline-block;
+      padding: .65rem 1rem;
+      border: 0;
+      border-radius: .35rem;
+      background: #193eb1;
+      color: white;
+      font: inherit;
+      font-weight: 650;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    :focus-visible { outline: 3px solid #18223b; outline-offset: 4px; }
+  </style>
+</head>
+<body>
+  {% url 'accounts:profile' as profile_url %}
+  {% url 'accounts:logout' as logout_url %}
+  {% url 'assessment_index' as assessment_url %}
+
+  <main>
+    <nav aria-label="Account">
+      <strong>PathImpact</strong>
+      {% if profile_url %}<a href="{{ profile_url }}">My profile</a>{% endif %}
+      {% if logout_url %}
+        <form method="post" action="{{ logout_url }}">
+          {% csrf_token %}
+          <button type="submit">Sign out</button>
+        </form>
+      {% endif %}
+    </nav>
+
+    <p class="label">{{ page_title|default:"Account dashboard" }}</p>
+    <h1>Welcome, {{ request.user.first_name|default:request.user.username }}.</h1>
+    {% if description %}<p>{{ description }}</p>{% endif %}
+
+    {% if messages %}
+      <ul aria-label="Notifications">
+        {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if role_view == "student" or request.resolver_match.url_name == "student_dashboard" %}
+      <section class="card" aria-labelledby="assessment-heading">
+        <p class="label">01 / Competency field notes</p>
+        <h2 id="assessment-heading">Competency self-assessment</h2>
+        <p>Reflect on your skills and revisit your saved ratings as you learn.</p>
+        {% if assessment_url %}
+          <a class="button" href="{{ assessment_url }}">Open self-assessments</a>
+        {% else %}
+          <p>The assessment page is currently unavailable.</p>
+        {% endif %}
+      </section>
+    {% endif %}
+  </main>
+</body>
+</html>
 {% extends "accounts/base.html" %}
 {% block title %}{{ page_title }}{% endblock %}
 {% block content %}

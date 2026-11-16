@@ -1,3 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}PathImpact{% endblock %}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f7f4ec; color: #18223b;
+           font: 1rem/1.6 system-ui, sans-serif; }
+    .shell { width: min(60rem, calc(100% - 2rem)); margin: auto; }
+    header.shell { display: flex; flex-wrap: wrap; align-items: center;
+                   justify-content: space-between; gap: 1rem; padding: 1rem 0;
+                   border-bottom: 1px solid #d7d2c5; }
+    main { padding: 2rem 0 4rem; }
+    h1, h2 { font-family: Georgia, serif; line-height: 1.2; }
+    h1 { font-size: clamp(2rem, 6vw, 3.5rem); }
+    a { color: #193eb1; }
+    .card, fieldset, .notice { padding: 1rem; background: #fffdf8;
+                               border: 1px solid #d7d2c5; }
+    fieldset { min-width: 0; }
+    .notice { border-left: .3rem solid #0c675d; }
+    .errorlist { color: #952b2b; }
+    button, .btn { display: inline-block; padding: .55rem .9rem;
+                   border: 1px solid #193eb1; border-radius: .35rem;
+                   background: #193eb1; color: white; font: inherit;
+                   font-weight: 650; text-decoration: none; cursor: pointer; }
+    .btn.quiet { background: #fffdf8; color: #193eb1; }
+    input, select, textarea { max-width: 100%; font: inherit; }
+    :focus-visible { outline: 3px solid #193eb1; outline-offset: 4px; }
+  </style>
+</head>
+<body>
+  {% url 'accounts:dashboard' as dashboard_url %}
+  <header class="shell">
+    <strong>PathImpact</strong>
+    {% if request.user.is_authenticated and dashboard_url %}
+      <a href="{{ dashboard_url }}">Back to dashboard</a>
+    {% endif %}
+  </header>
+  <main class="shell">
+    {% if messages %}
+      <div class="notice" role="status">
+        {% for message in messages %}<p>{{ message }}</p>{% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
 {% load static %}<!doctype html>
 <html lang="en">
 <head>

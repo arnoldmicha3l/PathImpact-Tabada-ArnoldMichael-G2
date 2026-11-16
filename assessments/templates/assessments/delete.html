@@ -1,0 +1,6 @@
+{% extends "accounts/base.html" %}
+{% block title %}Delete attempt · PathImpact{% endblock %}
+{% block content %}
+<header class="intro"><p class="eyebrow">PRIVATE SELF-ASSESSMENT</p><h1>Delete attempt {{ attempt.pk }}?</h1><p>This permanently removes the attempt and all its ratings.</p></header>
+<section class="card narrow"><form method="post">{% csrf_token %}<div class="form-actions"><button type="submit">Confirm deletion</button><a class="btn quiet" href="{% url 'assessment_detail' attempt.pk %}">Cancel</a></div></form></section>
+{% endblock %}
