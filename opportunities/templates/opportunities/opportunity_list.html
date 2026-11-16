@@ -1,0 +1,24 @@
+{% extends "accounts/base.html" %}
+{% block title %}Opportunities{% endblock %}
+{% block content %}
+<div class="page-head">
+    <div><h1>{% if is_admin %}Manage opportunities{% else %}Find your cause{% endif %}</h1>
+    <p class="muted">{{ opportunities|length }} opportunit{{ opportunities|length|pluralize:"y,ies" }} found</p></div>
+    {% if is_admin %}<a class="btn" href="{% url 'opportunities:create' %}">＋ New opportunity</a>{% endif %}
+</div>
+<form class="filters card" method="get">
+    <input type="search" name="q" value="{{ q }}" placeholder="🔍 Search title, place or keyword…">
+    <select name="category">
+        <option value="">All categories</option>
+        {% for val, label in categories %}<option value="{{ val }}" {% if val == category %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button class="btn" type="submit">Filter</button>
+    {% if q or category %}<a class="btn btn-light" href="{% url 'opportunities:list' %}">Reset</a>{% endif %}
+</form>
+<div class="grid">
+    {% for opp in opportunities %}{% include "opportunities/_card.html" %}
+    {% empty %}
+    <div class="card empty wide"><div class="big">🔎</div><p>No opportunities match your search.</p></div>
+    {% endfor %}
+</div>
+{% endblock %}

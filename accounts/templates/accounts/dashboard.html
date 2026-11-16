@@ -97,3 +97,60 @@
   </main>
 </body>
 </html>
+{% extends "accounts/base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+<section class="hero-banner">
+    <div>
+        <span class="pill">{{ user.get_role_display }}</span>
+        <h1>Hello, {{ user.first_name|default:user.username }} 👋</h1>
+        <p>{{ description }}</p>
+        <div class="actions">
+            {% if role_view == 'student' %}
+                <a class="btn" href="{% url 'opportunities:list' %}">Browse opportunities →</a>
+                <a class="btn btn-light" href="{% url 'opportunities:my_applications' %}">My applications</a>
+            {% else %}
+                <a class="btn" href="{% url 'opportunities:create' %}">＋ New opportunity</a>
+                <a class="btn btn-light" href="{% url 'opportunities:review_list' %}">Review queue</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="hero-art" aria-hidden="true"><span>🌏</span></div>
+</section>
+
+<section class="stats">
+    {% for icon, label, value in stats %}
+    <div class="stat card hover" style="--i:{{ forloop.counter0 }}">
+        <div class="stat-ico">{{ icon }}</div>
+        <div class="stat-num" data-count="{{ value }}">{{ value }}</div>
+        <div class="stat-label">{{ label }}</div>
+    </div>
+    {% endfor %}
+</section>
+
+{% if role_view == 'student' %}
+<section class="card">
+    <div class="card-head"><h2>Recent applications</h2><a href="{% url 'opportunities:my_applications' %}">View all →</a></div>
+    {% for a in recent_applications %}
+        <a class="row" href="{% url 'opportunities:detail' a.opportunity.pk %}">
+            <div><strong>{{ a.opportunity.title }}</strong><div class="muted small">{{ a.opportunity.location }} · {{ a.opportunity.event_date|date:"M d, Y" }}</div></div>
+            <span class="status {{ a.status }}">{{ a.get_status_display }}</span>
+        </a>
+    {% empty %}
+        <div class="empty"><div class="big">🌱</div><p>No applications yet. Your first one is a click away.</p><a class="btn btn-sm" href="{% url 'opportunities:list' %}">Find an opportunity</a></div>
+    {% endfor %}
+</section>
+{% else %}
+<section class="card">
+    <div class="card-head"><h2>Waiting for your review</h2><a href="{% url 'opportunities:review_list' %}">Open queue →</a></div>
+    {% for a in pending_reviews %}
+        <a class="row" href="{% url 'opportunities:review' a.pk %}">
+            <div><strong>{{ a.applicant.get_full_name|default:a.applicant.username }}</strong><div class="muted small">applied to {{ a.opportunity.title }} · {{ a.created_at|timesince }} ago</div></div>
+            <span class="status pending">Review</span>
+        </a>
+    {% empty %}
+        <div class="empty"><div class="big">🎉</div><p>Inbox zero! No applications waiting.</p></div>
+    {% endfor %}
+</section>
+{% endif %}
+{% endblock %}

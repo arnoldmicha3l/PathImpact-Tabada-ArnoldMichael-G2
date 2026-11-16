@@ -1,0 +1,20 @@
+{% extends "accounts/base.html" %}
+{% block title %}My profile{% endblock %}
+{% block content %}
+<section class="card profile-card narrow">
+    <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
+    <h1>{{ user.get_full_name|default:user.username }}</h1>
+    <span class="pill">{{ user.get_role_display }}</span>
+    <dl class="details">
+        <dt>Username</dt><dd>{{ user.username }}</dd>
+        <dt>First name</dt><dd>{{ user.first_name|default:"—" }}</dd>
+        <dt>Last name</dt><dd>{{ user.last_name|default:"—" }}</dd>
+        <dt>Email</dt><dd>{{ user.email|default:"—" }}</dd>
+        <dt>Member since</dt><dd>{{ user.date_joined|date:"F j, Y" }}</dd>
+    </dl>
+    <div class="actions center">
+        <a class="btn" href="{% url 'accounts:edit_profile' %}">Edit profile</a>
+        <a class="btn btn-light" href="{% url 'accounts:dashboard' %}">Dashboard</a>
+    </div>
+</section>
+{% endblock %}
