@@ -1,0 +1,18 @@
+{% extends "accounts/base.html" %}
+{% block title %}{{ mode }} opportunity{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'opportunities:list' %}">← Back</a>
+<section class="card narrow wide-form">
+    <h1>{{ mode }} opportunity</h1>
+    <p class="muted">Fill in the details students will see.</p>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="toast error">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="form-grid">
+            {% for field in form %}<div class="{% if field.name == 'description' or field.name == 'title' %}full{% endif %}">{% include "accounts/_field.html" %}</div>{% endfor %}
+        </div>
+        <div class="actions"><button class="btn" type="submit">{% if mode == 'Create' %}Publish{% else %}Save changes{% endif %}</button>
+            <a class="btn btn-light" href="{% url 'opportunities:list' %}">Cancel</a></div>
+    </form>
+</section>
+{% endblock %}
