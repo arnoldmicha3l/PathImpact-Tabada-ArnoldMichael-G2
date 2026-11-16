@@ -1,0 +1,55 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}PathImpact{% endblock %} · PathImpact</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'accounts/pathimpact.css' %}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+    {% block shell %}
+    <header class="topbar">
+        <a class="logo" href="{% url 'home' %}"><span class="logo-mark">◆</span><span>Path<b>Impact</b></span></a>
+        <input type="checkbox" id="nav-toggle" class="nav-toggle">
+        <label for="nav-toggle" class="burger" aria-label="Menu">☰</label>
+        <nav class="links">
+            {% if user.is_authenticated %}
+                {% with rn=request.resolver_match.url_name %}
+                <a href="{% url 'accounts:dashboard' %}" class="{% if 'dashboard' in rn %}active{% endif %}">Dashboard</a>
+                <a href="{% url 'opportunities:list' %}" class="{% if rn == 'list' or rn == 'detail' or rn == 'create' or rn == 'edit' %}active{% endif %}">Opportunities</a>
+                {% if user.role == 'student' %}
+                    <a href="{% url 'opportunities:my_applications' %}" class="{% if rn == 'my_applications' or rn == 'application_edit' or rn == 'apply' %}active{% endif %}">My Applications</a>
+                {% else %}
+                    <a href="{% url 'opportunities:review_list' %}" class="{% if rn == 'review_list' or rn == 'review' %}active{% endif %}">Review Queue</a>
+                {% endif %}
+                <a href="{% url 'accounts:profile' %}" class="{% if 'profile' in rn %}active{% endif %}">Profile</a>
+                {% endwith %}
+                <span class="user-chip"><i>{{ user.username|slice:":1"|upper }}</i>{{ user.get_role_display }}</span>
+                <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn-ghost" type="submit">Log out</button></form>
+            {% else %}
+                <a href="{% url 'accounts:login' %}">Log in</a>
+                <a class="btn btn-sm" href="{% url 'accounts:register' %}">Get started</a>
+            {% endif %}
+        </nav>
+    </header>
+    <main class="page">
+        {% include "accounts/_messages.html" %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">PathImpact · turning student passion into community impact</footer>
+    {% endblock %}
+    <script>
+    document.querySelectorAll('.toast .x').forEach(function(b){b.addEventListener('click',function(){b.parentElement.remove()})});
+    setTimeout(function(){document.querySelectorAll('.toast.success').forEach(function(t){t.classList.add('out')})},5000);
+    document.querySelectorAll('[data-count]').forEach(function(el){
+        var end=parseInt(el.dataset.count,10),n=0,step=Math.max(1,Math.ceil(end/24));
+        if(!end){return}
+        var t=setInterval(function(){n=Math.min(end,n+step);el.textContent=n;if(n>=end)clearInterval(t)},30);
+    });
+    </script>
+</body>
+</html>

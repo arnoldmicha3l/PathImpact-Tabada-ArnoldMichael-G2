@@ -10,6 +10,34 @@ from .forms import ProfileForm, RegistrationForm
 from .models import CustomUser
 
 
+def _student_context(user):
+    from django.utils import timezone
+    from opportunities.models import Application, Opportunity
+    apps = user.applications.select_related("opportunity")
+    return {
+        "stats": [
+            ("📨", "Applications", apps.count()),
+            ("⏳", "Pending", apps.filter(status=Application.Status.PENDING).count()),
+            ("✅", "Approved", apps.filter(status=Application.Status.APPROVED).count()),
+            ("🌱", "Open to join", Opportunity.objects.filter(status="open", deadline__gte=timezone.localdate()).count()),
+        ],
+        "recent_applications": apps[:4],
+    }
+
+
+def _admin_context(user):
+    from opportunities.models import Application, Opportunity
+    return {
+        "stats": [
+            ("📣", "Opportunities", Opportunity.objects.count()),
+            ("🟢", "Open", Opportunity.objects.filter(status="open").count()),
+            ("📥", "Awaiting review", Application.objects.filter(status=Application.Status.PENDING).count()),
+            ("🙌", "Volunteers approved", Application.objects.filter(status=Application.Status.APPROVED).count()),
+        ],
+        "pending_reviews": Application.objects.filter(status=Application.Status.PENDING).select_related("opportunity", "applicant")[:5],
+    }
+
+
 def home(request):
     if request.user.is_authenticated:
         return redirect("accounts:dashboard")
@@ -72,7 +100,9 @@ def student_dashboard(request):
         "accounts/dashboard.html",
         {
             "page_title": "Student dashboard",
-            "description": "View and update your personal PathImpact profile.",
+            "description": "Discover causes, apply to volunteer and track your impact.",
+            "role_view": "student",
+            **_student_context(request.user),
         },
     )
 
@@ -86,7 +116,9 @@ def administrator_dashboard(request):
         "accounts/dashboard.html",
         {
             "page_title": "Administrator dashboard",
-            "description": "Review your administrator account and profile.",
+            "description": "Publish opportunities and review volunteer applications.",
+            "role_view": "administrator",
+            **_admin_context(request.user),
         },
     )
 
