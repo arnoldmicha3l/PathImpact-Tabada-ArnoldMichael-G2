@@ -1,0 +1,79 @@
+.cf {
+  --cf-ink: #122735;
+  --cf-paper: #fffdf7;
+  --cf-jade: #195446;
+  --cf-line: #c5d5ce;
+  color: var(--cf-ink);
+}
+.cf .cf-spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, .85fr);
+  align-items: stretch;
+  gap: 1rem;
+}
+.cf .cf-panel {
+  min-width: 0;
+  padding: clamp(1.1rem, 4vw, 2.3rem);
+  border: 1px solid var(--cf-line);
+  border-radius: .8rem;
+  background: var(--cf-paper);
+  overflow-wrap: anywhere;
+}
+.cf .cf-panel h1 { margin: .35rem 0 .8rem; }
+.cf .cf-label {
+  color: var(--cf-jade);
+  font-size: .84rem;
+  font-weight: 750;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.cf .cf-map {
+  display: grid;
+  align-content: center;
+  padding: clamp(.75rem, 3vw, 2rem);
+  border-radius: .8rem;
+  background: var(--cf-ink);
+  color: var(--cf-paper);
+}
+.cf .cf-map p { margin: .5rem 0 0; color: #d6e8e1; }
+.cf .cf-fold { margin: 0; }
+.cf .cf-fold svg { display: block; width: 100%; height: auto; }
+.cf .cf-details {
+  display: grid;
+  grid-template-columns: minmax(6rem, 1fr) minmax(0, 2fr);
+  gap: .55rem 1rem;
+}
+.cf .cf-details dd { margin: 0; overflow-wrap: anywhere; }
+.cf .cf-details dt { font-weight: 700; }
+.cf .cf-secondary { margin-top: 1rem; }
+.cf label { display: block; font-weight: 700; }
+.cf .field { margin-bottom: 1rem; }
+.cf .field :is(input, select, textarea) { width: 100%; min-height: 44px; }
+.cf .btn { min-height: 44px; }
+.cf :focus-visible { outline: 3px solid var(--cf-jade); outline-offset: 4px; }
+@media (prefers-reduced-motion: no-preference) {
+  .cf .cf-route { stroke-dasharray: 1; animation: cf-trace 560ms ease-out both; }
+  .cf .cf-bookmark { animation: cf-settle 200ms 360ms ease-out both; }
+}
+@keyframes cf-trace { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes cf-settle { from { transform: translateY(-5px); } to { transform: translateY(0); } }
+@media (max-width: 44rem) {
+  .cf .cf-spread { grid-template-columns: minmax(0, 1fr); }
+  .cf .cf-fold { max-width: 20rem; margin-inline: auto; }
+}
+@media (max-width: 25rem) {
+  .cf .cf-details { grid-template-columns: minmax(0, 1fr); }
+}
+.cf .cf-identity { display: flex; align-items: center; flex-wrap: wrap; gap: .7rem 1rem; }
+.cf .cf-identity h1 { margin: 0; }
+.cf .cf-identity .btn { margin-inline-start: auto; }
+.cf .cf-initial {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: .55rem;
+  color: #fffdf7;
+  background: var(--cf-jade);
+  font-weight: 800;
+}
