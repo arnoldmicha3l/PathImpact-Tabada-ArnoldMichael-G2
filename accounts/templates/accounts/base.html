@@ -1,105 +1,118 @@
+{% load static %}
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}PathImpact{% endblock %}</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; background: #f7f4ec; color: #18223b;
-           font: 1rem/1.6 system-ui, sans-serif; }
-    .shell { width: min(60rem, calc(100% - 2rem)); margin: auto; }
-    header.shell { display: flex; flex-wrap: wrap; align-items: center;
-                   justify-content: space-between; gap: 1rem; padding: 1rem 0;
-                   border-bottom: 1px solid #d7d2c5; }
-    main { padding: 2rem 0 4rem; }
-    h1, h2 { font-family: Georgia, serif; line-height: 1.2; }
-    h1 { font-size: clamp(2rem, 6vw, 3.5rem); }
-    a { color: #193eb1; }
-    .card, fieldset, .notice { padding: 1rem; background: #fffdf8;
-                               border: 1px solid #d7d2c5; }
-    fieldset { min-width: 0; }
-    .notice { border-left: .3rem solid #0c675d; }
-    .errorlist { color: #952b2b; }
-    button, .btn { display: inline-block; padding: .55rem .9rem;
-                   border: 1px solid #193eb1; border-radius: .35rem;
-                   background: #193eb1; color: white; font: inherit;
-                   font-weight: 650; text-decoration: none; cursor: pointer; }
-    .btn.quiet { background: #fffdf8; color: #193eb1; }
-    input, select, textarea { max-width: 100%; font: inherit; }
-    :focus-visible { outline: 3px solid #193eb1; outline-offset: 4px; }
-  </style>
-</head>
-<body>
-  {% url 'accounts:dashboard' as dashboard_url %}
-  <header class="shell">
-    <strong>PathImpact</strong>
-    {% if request.user.is_authenticated and dashboard_url %}
-      <a href="{{ dashboard_url }}">Back to dashboard</a>
-    {% endif %}
-  </header>
-  <main class="shell">
-    {% if messages %}
-      <div class="notice" role="status">
-        {% for message in messages %}<p>{{ message }}</p>{% endfor %}
-      </div>
-    {% endif %}
-    {% block content %}{% endblock %}
-  </main>
-</body>
-</html>
-{% load static %}<!doctype html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}PathImpact{% endblock %} · PathImpact</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#122735">
+    <title>{% block title %}Academic pathways{% endblock %} | PathImpact</title>
     <link rel="stylesheet" href="{% static 'accounts/pathimpact.css' %}">
+    <style>
+        .phase1-skip {
+            position: fixed;
+            z-index: 100;
+            top: .75rem;
+            left: .75rem;
+            padding: .6rem 1rem;
+            border: 2px solid #195446;
+            border-radius: .4rem;
+            background: #fffdf7;
+            color: #195446;
+            transform: translateY(-200%);
+        }
+        .phase1-skip:focus { transform: none; }
+
+        .phase1-brand-mark svg {
+            display: block;
+            width: 1.2rem;
+            height: 1.2rem;
+        }
+
+        .phase1-notices {
+            display: grid;
+            gap: .5rem;
+            margin: 0 0 1rem;
+        }
+        .phase1-notice {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: .25rem .65rem;
+            padding: .75rem 1rem;
+            border: 1px solid #b7cec2;
+            border-inline-start: .25rem solid #195446;
+            border-radius: .5rem;
+            background: #e8f1ec;
+            color: #173d34;
+            overflow-wrap: anywhere;
+        }
+        .phase1-notice--error {
+            border-color: #d2a39b;
+            border-inline-start-color: #8b3226;
+            background: #fff2ed;
+            color: #76291f;
+        }
+        .phase1-notice--warning {
+            border-color: #d5bd90;
+            border-inline-start-color: #846023;
+            background: #fff5df;
+            color: #624616;
+        }
+    </style>
 </head>
 <body class="{% block body_class %}{% endblock %}">
-    <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
     {% block shell %}
+    <a class="phase1-skip" href="#main">Skip to content</a>
+
     <header class="topbar">
-        <a class="logo" href="{% url 'home' %}"><span class="logo-mark">◆</span><span>Path<b>Impact</b></span></a>
-        <input type="checkbox" id="nav-toggle" class="nav-toggle">
-        <label for="nav-toggle" class="burger" aria-label="Menu">☰</label>
-        <nav class="links">
-            {% if user.is_authenticated %}
-                {% with rn=request.resolver_match.url_name %}
-                <a href="{% url 'accounts:dashboard' %}" class="{% if 'dashboard' in rn %}active{% endif %}">Dashboard</a>
-                <a href="{% url 'opportunities:list' %}" class="{% if rn == 'list' or rn == 'detail' or rn == 'create' or rn == 'edit' %}active{% endif %}">Opportunities</a>
-                {% if user.role == 'student' %}
-                    <a href="{% url 'opportunities:my_applications' %}" class="{% if rn == 'my_applications' or rn == 'application_edit' or rn == 'apply' %}active{% endif %}">My Applications</a>
+        <a class="logo" href="{% url 'home' %}">
+            <span class="logo-mark phase1-brand-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M5 18h4l6-7h4"
+                          stroke="#fffdf7" stroke-width="1.7"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="5" cy="18" r="2" fill="#e7b47c"/>
+                    <circle cx="19" cy="11" r="2" fill="#a8e8ce"/>
+                </svg>
+            </span>
+            <span>Path<b>Impact</b></span>
+        </a>
+
+        <input type="checkbox" id="nav-toggle" class="nav-toggle"
+               aria-label="Toggle navigation" aria-controls="primary-nav">
+        <label for="nav-toggle" class="burger" aria-hidden="true">&#9776;</label>
+
+        <nav id="primary-nav" class="links" aria-label="Main navigation">
+            {% with rn=request.resolver_match.url_name %}
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:dashboard' %}"{% if rn and 'dashboard' in rn %} class="active" aria-current="page"{% endif %}>Dashboard</a>
+                    <a href="{% url 'accounts:profile' %}"{% if rn and 'profile' in rn %} class="active"{% endif %}{% if rn == 'profile' %} aria-current="page"{% endif %}>My profile</a>
+
+                    <span class="user-chip">
+                        <i aria-hidden="true">{{ user.username|slice:":1"|upper }}</i>
+                        {{ user.get_role_display }}
+                    </span>
+
+                    <form method="post" action="{% url 'accounts:logout' %}">
+                        {% csrf_token %}
+                        <button class="btn-ghost" type="submit">Log out</button>
+                    </form>
                 {% else %}
-                    <a href="{% url 'opportunities:review_list' %}" class="{% if rn == 'review_list' or rn == 'review' %}active{% endif %}">Review Queue</a>
+                    <a href="{% url 'accounts:login' %}"{% if rn == 'login' %} class="active" aria-current="page"{% endif %}>Log in</a>
+                    <a href="{% url 'accounts:register' %}"{% if rn == 'register' %} class="active" aria-current="page"{% endif %}>Create account</a>
                 {% endif %}
-                <a href="{% url 'accounts:profile' %}" class="{% if 'profile' in rn %}active{% endif %}">Profile</a>
-                {% endwith %}
-                <span class="user-chip"><i>{{ user.username|slice:":1"|upper }}</i>{{ user.get_role_display }}</span>
-                <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn-ghost" type="submit">Log out</button></form>
-            {% else %}
-                <a href="{% url 'accounts:login' %}">Log in</a>
-                <a class="btn btn-sm" href="{% url 'accounts:register' %}">Get started</a>
-            {% endif %}
+            {% endwith %}
         </nav>
     </header>
-    <main class="page">
+
+    <main class="page" id="main" tabindex="-1">
         {% include "accounts/_messages.html" %}
         {% block content %}{% endblock %}
     </main>
-    <footer class="footer">PathImpact · turning student passion into community impact</footer>
+
+    <footer class="footer">
+        PathImpact &middot; Academic Prerequisite Impact and Readiness Analyzer
+    </footer>
     {% endblock %}
-    <script>
-    document.querySelectorAll('.toast .x').forEach(function(b){b.addEventListener('click',function(){b.parentElement.remove()})});
-    setTimeout(function(){document.querySelectorAll('.toast.success').forEach(function(t){t.classList.add('out')})},5000);
-    document.querySelectorAll('[data-count]').forEach(function(el){
-        var end=parseInt(el.dataset.count,10),n=0,step=Math.max(1,Math.ceil(end/24));
-        if(!end){return}
-        var t=setInterval(function(){n=Math.min(end,n+step);el.textContent=n;if(n>=end)clearInterval(t)},30);
-    });
-    </script>
 </body>
 </html>

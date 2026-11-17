@@ -1,156 +1,33 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ page_title|default:"Dashboard" }} | PathImpact</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: #f7f4ec;
-      color: #18223b;
-      font: 1rem/1.6 system-ui, sans-serif;
-    }
-    main { width: min(58rem, calc(100% - 2rem)); margin: 3rem auto; }
-    nav {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid #d7d2c5;
-    }
-    nav strong { margin-right: auto; }
-    h1, h2 { font-family: Georgia, serif; line-height: 1.15; }
-    h1 { font-size: clamp(2.4rem, 7vw, 4.5rem); margin: .4rem 0 1rem; }
-    .label {
-      color: #49546a;
-      font-size: .8rem;
-      font-weight: 700;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-    }
-    .card {
-      margin-top: 2rem;
-      padding: clamp(1.25rem, 5vw, 2.5rem);
-      background: #fffdf8;
-      border: 1px solid #d7d2c5;
-      border-left: .35rem solid #193eb1;
-    }
-    .card h2 { margin: .4rem 0; }
-    a { color: #193eb1; }
-    .button, button {
-      display: inline-block;
-      padding: .65rem 1rem;
-      border: 0;
-      border-radius: .35rem;
-      background: #193eb1;
-      color: white;
-      font: inherit;
-      font-weight: 650;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    :focus-visible { outline: 3px solid #18223b; outline-offset: 4px; }
-  </style>
-</head>
-<body>
-  {% url 'accounts:profile' as profile_url %}
-  {% url 'accounts:logout' as logout_url %}
-  {% url 'assessment_index' as assessment_url %}
-
-  <main>
-    <nav aria-label="Account">
-      <strong>PathImpact</strong>
-      {% if profile_url %}<a href="{{ profile_url }}">My profile</a>{% endif %}
-      {% if logout_url %}
-        <form method="post" action="{{ logout_url }}">
-          {% csrf_token %}
-          <button type="submit">Sign out</button>
-        </form>
-      {% endif %}
-    </nav>
-
-    <p class="label">{{ page_title|default:"Account dashboard" }}</p>
-    <h1>Welcome, {{ request.user.first_name|default:request.user.username }}.</h1>
-    {% if description %}<p>{{ description }}</p>{% endif %}
-
-    {% if messages %}
-      <ul aria-label="Notifications">
-        {% for message in messages %}<li>{{ message }}</li>{% endfor %}
-      </ul>
-    {% endif %}
-
-    {% if role_view == "student" or request.resolver_match.url_name == "student_dashboard" %}
-      <section class="card" aria-labelledby="assessment-heading">
-        <p class="label">01 / Competency field notes</p>
-        <h2 id="assessment-heading">Competency self-assessment</h2>
-        <p>Reflect on your skills and revisit your saved ratings as you learn.</p>
-        {% if assessment_url %}
-          <a class="button" href="{{ assessment_url }}">Open self-assessments</a>
-        {% else %}
-          <p>The assessment page is currently unavailable.</p>
-        {% endif %}
-      </section>
-    {% endif %}
-  </main>
-</body>
-</html>
 {% extends "accounts/base.html" %}
-{% block title %}{{ page_title }}{% endblock %}
+{% load static %}
+{% block title %}{% if user.role == "student" %}Student dashboard{% else %}Administrator dashboard{% endif %}{% endblock %}
 {% block content %}
-<section class="hero-banner">
-    <div>
-        <span class="pill">{{ user.get_role_display }}</span>
-        <h1>Hello, {{ user.first_name|default:user.username }} 👋</h1>
-        <p>{{ description }}</p>
-        <div class="actions">
-            {% if role_view == 'student' %}
-                <a class="btn" href="{% url 'opportunities:list' %}">Browse opportunities →</a>
-                <a class="btn btn-light" href="{% url 'opportunities:my_applications' %}">My applications</a>
-            {% else %}
-                <a class="btn" href="{% url 'opportunities:create' %}">＋ New opportunity</a>
-                <a class="btn btn-light" href="{% url 'opportunities:review_list' %}">Review queue</a>
-            {% endif %}
-        </div>
+<link rel="stylesheet" href="{% static 'accounts/contour-fold.css' %}">
+<div class="cf">
+<div class="cf-spread">
+  <section class="cf-panel" aria-labelledby="dashboard-heading">
+    <p class="cf-label">{{ user.get_role_display }}</p>
+    {% if user.role == "student" %}
+      <h1 id="dashboard-heading">Welcome, {{ user.first_name|default:user.username }}.</h1>
+      <p>View or update your account information as you prepare for future academic readiness activities.</p>
+    {% else %}
+      <h1 id="dashboard-heading">Administrator workspace</h1>
+      <p>You’re signed in as {{ user.username }}. You can view your own account information below.</p>
+    {% endif %}
+    <div class="actions">
+      <a class="btn" href="{% url 'accounts:profile' %}">View my profile</a>
+      {% if user.role != "student" and user.is_staff %}
+        <a class="btn btn-light" href="{% url 'admin:index' %}">Open Django administration</a>
+      {% endif %}
     </div>
-    <div class="hero-art" aria-hidden="true"><span>🌏</span></div>
-</section>
-
-<section class="stats">
-    {% for icon, label, value in stats %}
-    <div class="stat card hover" style="--i:{{ forloop.counter0 }}">
-        <div class="stat-ico">{{ icon }}</div>
-        <div class="stat-num" data-count="{{ value }}">{{ value }}</div>
-        <div class="stat-label">{{ label }}</div>
-    </div>
-    {% endfor %}
-</section>
-
-{% if role_view == 'student' %}
-<section class="card">
-    <div class="card-head"><h2>Recent applications</h2><a href="{% url 'opportunities:my_applications' %}">View all →</a></div>
-    {% for a in recent_applications %}
-        <a class="row" href="{% url 'opportunities:detail' a.opportunity.pk %}">
-            <div><strong>{{ a.opportunity.title }}</strong><div class="muted small">{{ a.opportunity.location }} · {{ a.opportunity.event_date|date:"M d, Y" }}</div></div>
-            <span class="status {{ a.status }}">{{ a.get_status_display }}</span>
-        </a>
-    {% empty %}
-        <div class="empty"><div class="big">🌱</div><p>No applications yet. Your first one is a click away.</p><a class="btn btn-sm" href="{% url 'opportunities:list' %}">Find an opportunity</a></div>
-    {% endfor %}
-</section>
-{% else %}
-<section class="card">
-    <div class="card-head"><h2>Waiting for your review</h2><a href="{% url 'opportunities:review_list' %}">Open queue →</a></div>
-    {% for a in pending_reviews %}
-        <a class="row" href="{% url 'opportunities:review' a.pk %}">
-            <div><strong>{{ a.applicant.get_full_name|default:a.applicant.username }}</strong><div class="muted small">applied to {{ a.opportunity.title }} · {{ a.created_at|timesince }} ago</div></div>
-            <span class="status pending">Review</span>
-        </a>
-    {% empty %}
-        <div class="empty"><div class="big">🎉</div><p>Inbox zero! No applications waiting.</p></div>
-    {% endfor %}
+  </section>
+  <aside class="cf-map">{% include "accounts/contour-fold.html" %}<p>{% if user.role == "student" %}Your academic pathway{% else %}Account reference desk{% endif %}</p></aside>
+</div>
+{% if user.role == "student" %}
+<section class="cf-panel cf-secondary">
+  <h2>What comes next</h2>
+  <p>Competency self-assessment and readiness analysis are planned for later phases.</p>
 </section>
 {% endif %}
+</div>
 {% endblock %}

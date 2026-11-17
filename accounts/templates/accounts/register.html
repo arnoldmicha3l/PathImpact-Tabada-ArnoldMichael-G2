@@ -1,29 +1,26 @@
 {% extends "accounts/base.html" %}
-{% block title %}Create an account{% endblock %}
-{% block body_class %}auth{% endblock %}
-{% block shell %}
-<div class="auth-wrap">
-    <section class="auth-hero">
-        <a class="logo" href="{% url 'home' %}"><span class="logo-mark">◆</span><span>Path<b>Impact</b></span></a>
-        <h1>Start your<br><span class="grad">impact story.</span></h1>
-        <p>Create a free student account and apply to meaningful volunteer opportunities today.</p>
-        <ul class="hero-points">
-            <li>🎓 Built for students</li><li>🔒 Passwords securely hashed</li><li>🤝 Real organisations, real change</li>
-        </ul>
-        <div class="hero-orbs"><span></span><span></span><span></span></div>
-    </section>
-    <section class="auth-panel">
-        <div class="auth-card">
-            <h2>Create your account ✨</h2>
-            <p class="muted">It takes less than a minute.</p>
-            {% if form.errors %}<div class="toast error"><span class="ico">⛔</span><span>Please correct the errors below.</span></div>{% endif %}
-            <form method="post" novalidate>
-                {% csrf_token %}
-                {% for field in form %}{% include "accounts/_field.html" %}{% endfor %}
-                <button class="btn btn-block" type="submit">Create account →</button>
-            </form>
-            <p class="switch">Already registered? <a href="{% url 'accounts:login' %}">Log in</a></p>
-        </div>
-    </section>
+{% load static %}
+{% block title %}Create account{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'accounts/contour-fold.css' %}">
+<div class="cf">
+<div class="cf-spread">
+  <section class="cf-panel" aria-labelledby="access-heading">
+    <p class="cf-label">Account access</p>
+    <h1 id="access-heading">Create account</h1>
+    <p>Create a student account to manage your academic profile.</p>
+    <form method="post">
+      {% csrf_token %}
+      {% include "accounts/contour-fields.html" %}
+      
+      <button class="btn" type="submit">Create account</button>
+    </form>
+    <p class="cf-secondary"><a href="{% url 'accounts:login' %}">Log in</a></p>
+  </section>
+  <aside class="cf-map">
+    {% include "accounts/contour-fold.html" %}
+    <p>PathImpact &middot; Academic pathways</p>
+  </aside>
+</div>
 </div>
 {% endblock %}

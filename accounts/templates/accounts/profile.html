@@ -1,20 +1,26 @@
 {% extends "accounts/base.html" %}
+{% load static %}
 {% block title %}My profile{% endblock %}
 {% block content %}
-<section class="card profile-card narrow">
-    <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
-    <h1>{{ user.get_full_name|default:user.username }}</h1>
-    <span class="pill">{{ user.get_role_display }}</span>
-    <dl class="details">
-        <dt>Username</dt><dd>{{ user.username }}</dd>
-        <dt>First name</dt><dd>{{ user.first_name|default:"—" }}</dd>
-        <dt>Last name</dt><dd>{{ user.last_name|default:"—" }}</dd>
-        <dt>Email</dt><dd>{{ user.email|default:"—" }}</dd>
-        <dt>Member since</dt><dd>{{ user.date_joined|date:"F j, Y" }}</dd>
-    </dl>
-    <div class="actions center">
-        <a class="btn" href="{% url 'accounts:edit_profile' %}">Edit profile</a>
-        <a class="btn btn-light" href="{% url 'accounts:dashboard' %}">Dashboard</a>
-    </div>
+<link rel="stylesheet" href="{% static 'accounts/contour-fold.css' %}">
+<div class="cf">
+{% url 'accounts:edit_profile' as edit_url %}
+{% if not edit_url %}{% url 'accounts:profile_edit' as edit_url %}{% endif %}
+<section class="cf-panel" aria-labelledby="profile-heading">
+  <p class="cf-label">{{ user.get_role_display }}</p>
+  <div class="cf-identity">
+    <span class="cf-initial" aria-hidden="true">{{ user.username|slice:":1"|upper }}</span>
+    <h1 id="profile-heading">My profile</h1>
+    {% if edit_url %}<a class="btn" href="{{ edit_url }}">Edit profile</a>{% endif %}
+  </div>
+  <dl class="cf-details">
+    <dt>Username</dt><dd>{{ user.username }}</dd>
+    <dt>First name</dt><dd>{{ user.first_name|default:"Not set" }}</dd>
+    <dt>Last name</dt><dd>{{ user.last_name|default:"Not set" }}</dd>
+    <dt>Email</dt><dd>{{ user.email|default:"Not set" }}</dd>
+    <dt>Member since</dt><dd>{{ user.date_joined|date:"F j, Y" }}</dd>
+  </dl>
+  <a href="{% url 'accounts:dashboard' %}">Back to dashboard</a>
 </section>
+</div>
 {% endblock %}
