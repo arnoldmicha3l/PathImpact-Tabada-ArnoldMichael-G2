@@ -1,4 +1,3 @@
-
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
@@ -8,6 +7,7 @@ from . import academic_views
 from . import prerequisite_views
 from . import competency_views
 from . import mapping_views
+from . import impact_views
 from . import user_management_views
 from . import report_views
 
@@ -17,7 +17,9 @@ app_name = "accounts"
 
 urlpatterns = [
 
-    # Authentication
+    # ========================================
+    # AUTHENTICATION
+    # ========================================
 
     path(
         "register/",
@@ -43,7 +45,9 @@ urlpatterns = [
         name="logout",
     ),
 
-    # Dashboards
+    # ========================================
+    # DASHBOARDS
+    # ========================================
 
     path(
         "dashboard/",
@@ -63,7 +67,9 @@ urlpatterns = [
         name="administrator_dashboard",
     ),
 
-    # Academic programs
+    # ========================================
+    # ACADEMIC PROGRAMS
+    # ========================================
 
     path(
         "administrator/programs/",
@@ -89,7 +95,9 @@ urlpatterns = [
         name="program_delete",
     ),
 
-    # Academic subjects
+    # ========================================
+    # ACADEMIC SUBJECTS
+    # ========================================
 
     path(
         "administrator/subjects/",
@@ -115,7 +123,9 @@ urlpatterns = [
         name="subject_delete",
     ),
 
-    # Prerequisites
+    # ========================================
+    # PREREQUISITES
+    # ========================================
 
     path(
         "administrator/prerequisites/",
@@ -141,7 +151,9 @@ urlpatterns = [
         name="prerequisite_delete",
     ),
 
-    # Competencies
+    # ========================================
+    # COMPETENCIES
+    # ========================================
 
     path(
         "administrator/competencies/",
@@ -167,7 +179,9 @@ urlpatterns = [
         name="competency_delete",
     ),
 
-    # Competency mappings
+    # ========================================
+    # COMPETENCY MAPPINGS
+    # ========================================
 
     path(
         "administrator/mappings/",
@@ -193,7 +207,38 @@ urlpatterns = [
         name="mapping_delete",
     ),
 
-    # User management
+    # ========================================
+    # COMPETENCY IMPACTS
+    # Phase 07H.1
+    # ========================================
+
+    path(
+        "administrator/impacts/",
+        impact_views.impacts,
+        name="impacts",
+    ),
+
+    path(
+        "administrator/impacts/new/",
+        impact_views.impact_edit,
+        name="impact_create",
+    ),
+
+    path(
+        "administrator/impacts/<int:pk>/edit/",
+        impact_views.impact_edit,
+        name="impact_edit",
+    ),
+
+    path(
+        "administrator/impacts/<int:pk>/delete/",
+        impact_views.impact_delete,
+        name="impact_delete",
+    ),
+
+    # ========================================
+    # USER MANAGEMENT
+    # ========================================
 
     path(
         "administrator/users/",
@@ -213,7 +258,9 @@ urlpatterns = [
         name="user_status",
     ),
 
-    # Assessment reports
+    # ========================================
+    # ASSESSMENT REPORTS
+    # ========================================
 
     path(
         "administrator/reports/",
@@ -227,7 +274,9 @@ urlpatterns = [
         name="assessment_reports_export",
     ),
 
-    # Account management
+    # ========================================
+    # ACCOUNT MANAGEMENT
+    # ========================================
 
     path(
         "profile/",

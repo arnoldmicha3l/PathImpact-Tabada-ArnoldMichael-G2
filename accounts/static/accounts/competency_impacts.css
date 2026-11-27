@@ -1,0 +1,333 @@
+.ci-workspace {
+    --ci-primary: #800020;
+    --ci-border: #e4e4e7;
+    --ci-muted: #71717a;
+}
+
+.ci-workspace .ci-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.ci-workspace .ci-heading h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 650;
+    color: #18181b;
+    letter-spacing: -0.7px;
+}
+
+.ci-workspace .ci-heading p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--ci-muted);
+}
+
+.ci-workspace .ci-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 9px 16px;
+    border: 1px solid var(--ci-primary);
+    border-radius: 6px;
+    background: var(--ci-primary);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ci-workspace .ci-button:hover {
+    background: #650019;
+}
+
+.ci-workspace .ci-button-secondary {
+    background: #ffffff;
+    border-color: var(--ci-border);
+    color: #52525b;
+}
+
+.ci-workspace .ci-button-secondary:hover {
+    background: #f4f4f5;
+}
+
+.ci-workspace .ci-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.ci-workspace .ci-summary-card {
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid var(--ci-border);
+    border-radius: 9px;
+}
+
+.ci-workspace .ci-summary-label {
+    display: block;
+    color: var(--ci-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.ci-workspace .ci-summary-value {
+    display: block;
+    margin: 12px 0 7px;
+    color: #18181b;
+    font-size: 30px;
+    line-height: 1;
+    font-weight: 650;
+    letter-spacing: -1px;
+}
+
+.ci-workspace .ci-summary-description {
+    color: var(--ci-muted);
+    font-size: 11px;
+}
+
+.ci-workspace .ci-panel {
+    background: #ffffff;
+    border: 1px solid var(--ci-border);
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.ci-workspace .ci-panel-heading {
+    padding: 20px;
+}
+
+.ci-workspace .ci-panel-heading h2 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    font-weight: 650;
+}
+
+.ci-workspace .ci-panel-heading p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--ci-muted);
+}
+
+.ci-workspace .ci-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 20px 20px;
+}
+
+.ci-workspace .ci-toolbar input,
+.ci-workspace .ci-toolbar select {
+    min-width: 140px;
+    min-height: 38px;
+    padding: 8px 11px;
+    border: 1px solid var(--ci-border);
+    border-radius: 6px;
+    background: #ffffff;
+    color: #27272a;
+    font-size: 12px;
+}
+
+.ci-workspace .ci-toolbar input {
+    flex: 1;
+    min-width: 180px;
+}
+
+.ci-workspace .ci-toolbar input:focus,
+.ci-workspace .ci-toolbar select:focus {
+    outline: 2px solid #e9c5ce;
+    border-color: var(--ci-primary);
+}
+
+.ci-workspace .ci-table-scroll {
+    overflow-x: auto;
+}
+
+.ci-workspace .ci-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.ci-workspace .ci-table th {
+    padding: 13px 16px;
+    background: #fafafa;
+    border-top: 1px solid var(--ci-border);
+    border-bottom: 1px solid var(--ci-border);
+    color: #52525b;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ci-workspace .ci-table td {
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f2;
+    vertical-align: middle;
+    font-size: 12px;
+}
+
+.ci-workspace .ci-table tbody tr:hover {
+    background: #fcfcfc;
+}
+
+.ci-workspace .ci-code {
+    display: block;
+    color: #27272a;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.ci-workspace .ci-secondary {
+    display: block;
+    margin-top: 4px;
+    color: var(--ci-muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.ci-workspace .ci-relevance {
+    display: inline-flex;
+    padding: 5px 9px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ci-workspace .ci-relevance-1 {
+    background: #f4f4f5;
+    color: #52525b;
+}
+
+.ci-workspace .ci-relevance-2 {
+    background: #fff7ed;
+    color: #9a3412;
+}
+
+.ci-workspace .ci-relevance-3 {
+    background: #f7edef;
+    color: #800020;
+}
+
+.ci-workspace .ci-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    white-space: nowrap;
+}
+
+.ci-workspace .ci-actions a {
+    color: var(--ci-primary);
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.ci-workspace .ci-actions a:hover {
+    text-decoration: underline;
+}
+
+.ci-workspace .ci-empty {
+    padding: 52px 20px;
+    text-align: center;
+}
+
+.ci-workspace .ci-empty h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: #27272a;
+}
+
+.ci-workspace .ci-empty p {
+    margin: 0 0 18px;
+    font-size: 12px;
+    color: var(--ci-muted);
+}
+
+.ci-workspace .ci-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    color: var(--ci-muted);
+    font-size: 12px;
+}
+
+.ci-workspace .ci-pagination a {
+    color: var(--ci-primary);
+    text-decoration: none;
+}
+
+.ci-workspace .ci-note {
+    margin-top: 18px;
+    padding: 15px 18px;
+    border: 1px solid var(--ci-border);
+    border-radius: 7px;
+    background: #ffffff;
+    color: var(--ci-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.ci-workspace .ci-confirmation {
+    max-width: 720px;
+    padding: 24px;
+}
+
+.ci-workspace .ci-confirmation dl {
+    margin: 20px 0;
+}
+
+.ci-workspace .ci-confirmation dt {
+    color: var(--ci-muted);
+    font-size: 12px;
+    margin-top: 14px;
+}
+
+.ci-workspace .ci-confirmation dd {
+    margin: 5px 0 0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.ci-workspace .ci-warning {
+    padding: 14px;
+    background: #fff7ed;
+    color: #9a3412;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+@media (max-width: 650px) {
+
+    .ci-workspace .ci-summary {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .ci-workspace .ci-heading h1 {
+        font-size: 24px;
+    }
+
+    .ci-workspace .ci-toolbar input,
+    .ci-workspace .ci-toolbar select {
+        width: 100%;
+    }
+
+    .ci-workspace .ci-heading .ci-button {
+        width: 100%;
+    }
+}

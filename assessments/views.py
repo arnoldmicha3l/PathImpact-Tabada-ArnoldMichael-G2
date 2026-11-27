@@ -1,4 +1,3 @@
-
 from functools import wraps
 
 from django.contrib import messages
@@ -6,12 +5,24 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Avg, Count
-from django.shortcuts import get_object_or_404, redirect, render
+
+from django.shortcuts import (
+    get_object_or_404,
+    redirect,
+    render,
+)
+
 from django.utils import timezone
-from django.views.decorators.http import require_safe, require_http_methods
+
+from django.views.decorators.http import (
+    require_safe,
+    require_http_methods,
+)
 
 from .forms import AssessmentForm
+
 from .models import (
+    AcademicProgram,
     AssessmentSession,
     AssessmentResponse,
     SubjectCompetency,
@@ -19,40 +30,65 @@ from .models import (
 
 
 def student_only(view):
+
     @login_required(login_url="accounts:login")
     @wraps(view)
     def wrapped(request, *args, **kwargs):
-        if request.user.role != "student":
+
+        if (
+            not request.user.is_active
+            or request.user.role != "student"
+        ):
+
             raise PermissionDenied
+
         return view(request, *args, **kwargs)
 
     return wrapped
 
 
 def own(request):
+
     return AssessmentSession.objects.filter(
         user=request.user
+    )
+
+
+def lock_academic_catalog():
+
+    list(
+        AcademicProgram.objects
+        .select_for_update()
+        .order_by("pk")
+        .values_list("pk", flat=True)
     )
 
 
 @student_only
 @require_safe
 def index(request):
+
     items = own(request).annotate(
         average_rating=Avg("responses__self_rating"),
         response_count=Count("responses"),
-    ).order_by("-started_at", "-pk")
+    ).order_by(
+        "-started_at",
+        "-pk",
+    )
 
     return render(
         request,
         "assessments/index.html",
-        {"items": items},
+        {
+            "items": items,
+        },
     )
 
 
 @student_only
 @require_safe
 def detail(request, pk):
+
     attempt = get_object_or_404(
         own(request),
         pk=pk,
@@ -71,8 +107,10 @@ def detail(request, pk):
     response_count = len(responses)
 
     average_rating = (
-        sum(response.self_rating for response in responses)
-        / response_count
+        sum(
+            response.self_rating
+            for response in responses
+        ) / response_count
         if response_count
         else None
     )
@@ -105,13 +143,20 @@ def detail(request, pk):
 @require_http_methods(["GET", "POST"])
 @transaction.atomic
 def edit(request, pk=None):
+
     queryset = own(request)
 
     if request.method == "POST":
+
+        lock_academic_catalog()
+
         queryset = queryset.select_for_update()
 
     attempt = (
-        get_object_or_404(queryset, pk=pk)
+        get_object_or_404(
+            queryset,
+            pk=pk,
+        )
         if pk is not None
         else None
     )
@@ -133,33 +178,54 @@ def edit(request, pk=None):
     )
 
     if attempt:
-        catalog = catalog.filter(pk__in=ratings)
+
+        catalog = catalog.filter(
+            pk__in=ratings
+        )
+
     else:
+
         catalog = catalog.filter(
             subject__program__code="BSIT",
             subject__code="DB-FND",
         )
 
+    if request.method == "POST":
+
+        catalog = catalog.select_for_update(
+            of=("self",)
+        ).order_by("pk")
+
     catalog = list(catalog)
 
     form = AssessmentForm(
-        request.POST if request.method == "POST" else None,
+        request.POST
+        if request.method == "POST"
+        else None,
         competencies=catalog,
         ratings=ratings,
     )
 
     if request.method == "POST" and form.is_valid():
+
         if attempt is None:
+
             attempt = AssessmentSession.objects.create(
                 user=request.user,
                 completed_at=timezone.now(),
             )
+
         else:
+
             attempt.responses.all().delete()
 
             if attempt.completed_at is None:
+
                 attempt.completed_at = timezone.now()
-                attempt.save(update_fields=["completed_at"])
+
+                attempt.save(
+                    update_fields=["completed_at"]
+                )
 
         AssessmentResponse.objects.bulk_create(
             form.responses(attempt)
@@ -167,9 +233,11 @@ def edit(request, pk=None):
 
         messages.success(
             request,
-            "Self-assessment saved."
-            if pk is None
-            else "Self-assessment updated.",
+            (
+                "Self-assessment saved."
+                if pk is None
+                else "Self-assessment updated."
+            ),
         )
 
         return redirect(
@@ -191,9 +259,13 @@ def edit(request, pk=None):
 @require_http_methods(["GET", "POST"])
 @transaction.atomic
 def delete(request, pk):
+
     queryset = own(request)
 
     if request.method == "POST":
+
+        lock_academic_catalog()
+
         queryset = queryset.select_for_update()
 
     attempt = get_object_or_404(
@@ -202,6 +274,7 @@ def delete(request, pk):
     )
 
     if request.method == "POST":
+
         attempt.delete()
 
         messages.success(
@@ -209,10 +282,14 @@ def delete(request, pk):
             "Self-assessment deleted.",
         )
 
-        return redirect("assessment_index")
+        return redirect(
+            "assessment_index"
+        )
 
     return render(
         request,
         "assessments/delete.html",
-        {"attempt": attempt},
+        {
+            "attempt": attempt,
+        },
     )

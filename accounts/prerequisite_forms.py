@@ -1,7 +1,7 @@
-
 from django import forms
 
 from assessments.models import (
+    CompetencyImpact,
     Subject,
     SubjectPrerequisite,
 )
@@ -10,6 +10,7 @@ from assessments.models import (
 class SubjectChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
+
         return (
             f"{obj.program.code} | "
             f"{obj.code} - {obj.name}"
@@ -33,9 +34,28 @@ class PrerequisiteForm(forms.ModelForm):
     )
 
     class Meta:
+
         model = SubjectPrerequisite
 
         fields = [
             "prerequisite",
             "successor",
         ]
+
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        if self.instance.pk and self.has_changed():
+
+            if CompetencyImpact.objects.filter(
+                prerequisite_id=self.instance.pk
+            ).exists():
+
+                raise forms.ValidationError(
+                    "This prerequisite relationship is "
+                    "referenced by competency impacts "
+                    "and cannot be modified."
+                )
+
+        return cleaned_data

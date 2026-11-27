@@ -1,12 +1,14 @@
-
 from django.contrib import messages
 from django.db import IntegrityError, transaction
 from django.db.models import Q
+from django.db.models.deletion import ProtectedError
+
 from django.shortcuts import (
     get_object_or_404,
     redirect,
     render,
 )
+
 from django.views.decorators.http import (
     require_safe,
     require_http_methods,
@@ -35,6 +37,7 @@ def prerequisites(request):
     )
 
     if query:
+
         records = records.filter(
             Q(prerequisite__code__icontains=query)
             | Q(prerequisite__name__icontains=query)
@@ -47,6 +50,7 @@ def prerequisites(request):
         and program.isdecimal()
         and len(program) <= 9
     ):
+
         records = records.filter(
             prerequisite__program_id=int(program)
         )
@@ -61,7 +65,8 @@ def prerequisites(request):
             "programs": AcademicProgram.objects.all(),
             "total": records.count(),
             "successor_count": (
-                records.values("successor_id")
+                records.order_by()
+                .values("successor_id")
                 .distinct()
                 .count()
             ),
@@ -76,7 +81,6 @@ def prerequisite_edit(request, pk=None):
 
     if request.method == "POST":
 
-        # Serialize graph edits through this workspace.
         list(
             AcademicProgram.objects
             .select_for_update()
@@ -94,17 +98,22 @@ def prerequisite_edit(request, pk=None):
     )
 
     form = PrerequisiteForm(
-        request.POST if request.method == "POST" else None,
+        request.POST
+        if request.method == "POST"
+        else None,
         instance=instance,
     )
 
     if request.method == "POST" and form.is_valid():
 
         try:
+
             with transaction.atomic():
+
                 form.save()
 
         except IntegrityError:
+
             form.add_error(
                 None,
                 "The relationship conflicts with "
@@ -112,12 +121,15 @@ def prerequisite_edit(request, pk=None):
             )
 
         else:
+
             messages.success(
                 request,
                 "Prerequisite saved successfully.",
             )
 
-            return redirect("accounts:prerequisites")
+            return redirect(
+                "accounts:prerequisites"
+            )
 
     return render(
         request,
@@ -160,17 +172,36 @@ def prerequisite_delete(request, pk):
 
     if request.method == "POST":
 
-        record.delete()
+        try:
 
-        messages.success(
-            request,
-            "Prerequisite deleted successfully.",
+            with transaction.atomic():
+
+                record.delete()
+
+        except (ProtectedError, IntegrityError):
+
+            messages.error(
+                request,
+                "This prerequisite relationship cannot "
+                "be removed because competency impacts "
+                "or other academic records depend on it.",
+            )
+
+        else:
+
+            messages.success(
+                request,
+                "Prerequisite deleted successfully.",
+            )
+
+        return redirect(
+            "accounts:prerequisites"
         )
-
-        return redirect("accounts:prerequisites")
 
     return render(
         request,
         "accounts/prerequisite_delete.html",
-        {"record": record},
+        {
+            "record": record,
+        },
     )

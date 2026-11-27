@@ -1,13 +1,14 @@
-
 from django.contrib import messages
 from django.db import IntegrityError, transaction
 from django.db.models import Exists, OuterRef, Q
 from django.db.models.deletion import ProtectedError
+
 from django.shortcuts import (
     get_object_or_404,
     redirect,
     render,
 )
+
 from django.views.decorators.http import (
     require_http_methods,
     require_safe,
@@ -19,6 +20,7 @@ from assessments.models import (
     Competency,
     SubjectCompetency,
     AssessmentResponse,
+    CompetencyImpact,
 )
 
 from .academic_views import paginate
@@ -37,9 +39,24 @@ def valid_filter(value):
 
 def protected_mapping(pk):
 
-    return AssessmentResponse.objects.filter(
-        subject_competency_id=pk
-    ).exists()
+    return (
+        AssessmentResponse.objects.filter(
+            subject_competency_id=pk
+        ).exists()
+        or CompetencyImpact.objects.filter(
+            subject_competency_id=pk
+        ).exists()
+    )
+
+
+def lock_programs():
+
+    list(
+        AcademicProgram.objects
+        .select_for_update()
+        .order_by("pk")
+        .values_list("pk", flat=True)
+    )
 
 
 @administrator_only
@@ -64,9 +81,16 @@ def mappings(request):
         "subject__program",
         "competency",
     ).annotate(
-        is_protected=Exists(
-            AssessmentResponse.objects.filter(
-                subject_competency_id=OuterRef("pk")
+        is_protected=(
+            Exists(
+                AssessmentResponse.objects.filter(
+                    subject_competency_id=OuterRef("pk")
+                )
+            )
+            | Exists(
+                CompetencyImpact.objects.filter(
+                    subject_competency_id=OuterRef("pk")
+                )
             )
         )
     )
@@ -211,6 +235,11 @@ def mapping_edit(request, pk=None):
 
             with transaction.atomic():
 
+                lock_programs()
+
+                old_subject_id = None
+                old_competency_id = None
+
                 if pk is not None:
 
                     instance = get_object_or_404(
@@ -218,12 +247,19 @@ def mapping_edit(request, pk=None):
                         pk=pk,
                     )
 
+                    old_subject_id = instance.subject_id
+
+                    old_competency_id = (
+                        instance.competency_id
+                    )
+
                     if protected_mapping(pk):
 
                         messages.error(
                             request,
                             "This mapping is protected by "
-                            "existing assessment responses.",
+                            "existing assessment responses "
+                            "or competency impacts.",
                         )
 
                         return redirect(
@@ -238,20 +274,15 @@ def mapping_edit(request, pk=None):
 
                 if form.is_valid():
 
+                    new_subject = (
+                        form.cleaned_data["subject"]
+                    )
+
                     competency_ids = [
                         form.cleaned_data["competency"].pk
                     ]
 
-                    if instance is not None:
-
-                        old_competency_id = (
-                            SubjectCompetency.objects
-                            .values_list(
-                                "competency_id",
-                                flat=True,
-                            )
-                            .get(pk=pk)
-                        )
+                    if old_competency_id is not None:
 
                         competency_ids.append(
                             old_competency_id
@@ -263,20 +294,44 @@ def mapping_edit(request, pk=None):
                         .order_by("pk")
                     )
 
-                    form.save()
-
-                    messages.success(
-                        request,
-                        (
-                            "Competency mapping created successfully."
-                            if pk is None
-                            else "Competency mapping updated successfully."
-                        ),
+                    removes_last_prototype_mapping = (
+                        old_subject_id is not None
+                        and old_subject_id != new_subject.pk
+                        and Subject.objects.filter(
+                            pk=old_subject_id,
+                            program__code="BSIT",
+                            code="DB-FND",
+                        ).exists()
+                        and not SubjectCompetency.objects.filter(
+                            subject_id=old_subject_id
+                        ).exclude(pk=pk).exists()
                     )
 
-                    return redirect(
-                        "accounts:mappings"
-                    )
+                    if removes_last_prototype_mapping:
+
+                        form.add_error(
+                            "subject",
+                            "The last competency mapping "
+                            "for the current self-assessment "
+                            "subject cannot be moved.",
+                        )
+
+                    else:
+
+                        form.save()
+
+                        messages.success(
+                            request,
+                            (
+                                "Competency mapping created successfully."
+                                if pk is None
+                                else "Competency mapping updated successfully."
+                            ),
+                        )
+
+                        return redirect(
+                            "accounts:mappings"
+                        )
 
         except IntegrityError:
 
@@ -373,6 +428,8 @@ def mapping_delete(request, pk):
 
             with transaction.atomic():
 
+                lock_programs()
+
                 record = get_object_or_404(
                     SubjectCompetency.objects.select_for_update(),
                     pk=pk,
@@ -387,7 +444,34 @@ def mapping_delete(request, pk):
                     messages.error(
                         request,
                         "This mapping cannot be removed "
-                        "because assessment responses reference it.",
+                        "because assessment responses or "
+                        "competency impacts reference it.",
+                    )
+
+                    return redirect(
+                        "accounts:mappings"
+                    )
+
+                is_prototype_mapping = (
+                    Subject.objects.filter(
+                        pk=record.subject_id,
+                        program__code="BSIT",
+                        code="DB-FND",
+                    ).exists()
+                )
+
+                if (
+                    is_prototype_mapping
+                    and not SubjectCompetency.objects.filter(
+                        subject_id=record.subject_id
+                    ).exclude(pk=pk).exists()
+                ):
+
+                    messages.error(
+                        request,
+                        "The last competency mapping "
+                        "for the current self-assessment "
+                        "subject cannot be removed.",
                     )
 
                     return redirect(

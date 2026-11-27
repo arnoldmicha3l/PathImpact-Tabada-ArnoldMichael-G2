@@ -1,4 +1,3 @@
-
 from django import forms
 
 from assessments.models import (
@@ -6,12 +5,14 @@ from assessments.models import (
     Competency,
     SubjectCompetency,
     AssessmentResponse,
+    CompetencyImpact,
 )
 
 
 class SubjectChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
+
         return (
             f"{obj.program.code} | "
             f"{obj.code} - {obj.name}"
@@ -21,6 +22,7 @@ class SubjectChoiceField(forms.ModelChoiceField):
 class CompetencyChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
+
         return f"{obj.code} - {obj.name}"
 
 
@@ -34,16 +36,21 @@ class MappingForm(forms.ModelForm):
             "code",
         ),
         empty_label="Select an academic subject",
-        help_text="Choose the subject that uses this competency.",
+        help_text=(
+            "Choose the subject that uses this competency."
+        ),
     )
 
     competency = CompetencyChoiceField(
         queryset=Competency.objects.order_by("code"),
         empty_label="Select a competency",
-        help_text="Choose an existing competency definition.",
+        help_text=(
+            "Choose an existing competency definition."
+        ),
     )
 
     class Meta:
+
         model = SubjectCompetency
 
         fields = [
@@ -67,6 +74,15 @@ class MappingForm(forms.ModelForm):
                 raise forms.ValidationError(
                     "This mapping is referenced by student "
                     "assessment responses and cannot be modified."
+                )
+
+            if CompetencyImpact.objects.filter(
+                subject_competency_id=self.instance.pk
+            ).exists():
+
+                raise forms.ValidationError(
+                    "This mapping is referenced by "
+                    "competency impacts and cannot be modified."
                 )
 
         if subject and competency:

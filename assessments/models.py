@@ -1,14 +1,24 @@
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
 
+# ========================================
+# 01 | ACADEMIC PROGRAM
+# ========================================
+
 class AcademicProgram(models.Model):
 
-    code = models.CharField(max_length=20, unique=True)
-    name = models.CharField(max_length=120, unique=True)
+    code = models.CharField(
+        max_length=20,
+        unique=True,
+    )
+
+    name = models.CharField(
+        max_length=120,
+        unique=True,
+    )
 
     class Meta:
         ordering = ["code"]
@@ -17,15 +27,21 @@ class AcademicProgram(models.Model):
         return f"{self.code} - {self.name}"
 
 
+# ========================================
+# 02 | ACADEMIC SUBJECT
+# ========================================
+
 class Subject(models.Model):
 
     class YearLevel(models.IntegerChoices):
+
         FIRST = 1, "First year"
         SECOND = 2, "Second year"
         THIRD = 3, "Third year"
         FOURTH = 4, "Fourth year"
 
     class Semester(models.IntegerChoices):
+
         FIRST = 1, "First semester"
         SECOND = 2, "Second semester"
         SUMMER = 3, "Summer"
@@ -35,8 +51,13 @@ class Subject(models.Model):
         on_delete=models.PROTECT,
     )
 
-    code = models.CharField(max_length=20)
-    name = models.CharField(max_length=120)
+    code = models.CharField(
+        max_length=20,
+    )
+
+    name = models.CharField(
+        max_length=120,
+    )
 
     year_level = models.PositiveSmallIntegerField(
         choices=YearLevel.choices,
@@ -93,15 +114,30 @@ class Subject(models.Model):
         return f"{self.code} - {self.name}"
 
 
+# ========================================
+# 03 | COMPETENCY
+# ========================================
+
 class Competency(models.Model):
 
-    code = models.CharField(max_length=24, unique=True)
-    name = models.CharField(max_length=120)
+    code = models.CharField(
+        max_length=24,
+        unique=True,
+    )
+
+    name = models.CharField(
+        max_length=120,
+    )
+
     description = models.TextField()
 
     def __str__(self):
         return f"{self.code} - {self.name}"
 
+
+# ========================================
+# 04 | SUBJECT COMPETENCY MAPPING
+# ========================================
 
 class SubjectCompetency(models.Model):
 
@@ -132,8 +168,16 @@ class SubjectCompetency(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.subject.code} - {self.competency.code}"
 
+        return (
+            f"{self.subject.code} - "
+            f"{self.competency.code}"
+        )
+
+
+# ========================================
+# 05 | ASSESSMENT SESSION
+# ========================================
 
 class AssessmentSession(models.Model):
 
@@ -152,22 +196,30 @@ class AssessmentSession(models.Model):
     )
 
     class Meta:
-        ordering = ["-started_at", "-pk"]
 
+        ordering = [
+            "-started_at",
+            "-pk",
+        ]
+
+
+# ========================================
+# 06 | ASSESSMENT RESPONSE
+# ========================================
 
 class AssessmentResponse(models.Model):
 
     class Rating(models.IntegerChoices):
 
-        BEGINNING = 1, "1 — I need a walkthrough"
+        BEGINNING = 1, "1 \u2014 I need a walkthrough"
 
-        DEVELOPING = 2, "2 — I can do this with help"
+        DEVELOPING = 2, "2 \u2014 I can do this with help"
 
-        PRACTICING = 3, "3 — I can usually do this on my own"
+        PRACTICING = 3, "3 \u2014 I can usually do this on my own"
 
-        CONFIDENT = 4, "4 — I can do this independently"
+        CONFIDENT = 4, "4 \u2014 I can do this independently"
 
-        EXPLAINING = 5, "5 — I can do this and explain it"
+        EXPLAINING = 5, "5 \u2014 I can do this and explain it"
 
     assessment = models.ForeignKey(
         AssessmentSession,
@@ -189,17 +241,26 @@ class AssessmentResponse(models.Model):
         constraints = [
 
             models.UniqueConstraint(
-                fields=["assessment", "subject_competency"],
+                fields=[
+                    "assessment",
+                    "subject_competency",
+                ],
                 name="unique_session_competency",
             ),
 
             models.CheckConstraint(
-                condition=models.Q(self_rating__range=(1, 5)),
+                condition=models.Q(
+                    self_rating__range=(1, 5)
+                ),
                 name="self_rating_between_1_and_5",
             ),
 
         ]
 
+
+# ========================================
+# 07 | SUBJECT PREREQUISITE
+# ========================================
 
 class SubjectPrerequisite(models.Model):
 
@@ -226,7 +287,10 @@ class SubjectPrerequisite(models.Model):
         constraints = [
 
             models.UniqueConstraint(
-                fields=["prerequisite", "successor"],
+                fields=[
+                    "prerequisite",
+                    "successor",
+                ],
                 name="unique_subject_prerequisite",
             ),
 
@@ -244,7 +308,10 @@ class SubjectPrerequisite(models.Model):
         super().clean()
 
         if not self.prerequisite_id or not self.successor_id:
+
             return
+
+        # Prevent self-referencing prerequisites.
 
         if self.prerequisite_id == self.successor_id:
 
@@ -252,13 +319,18 @@ class SubjectPrerequisite(models.Model):
                 "A subject cannot require itself."
             )
 
+        # Verify that both subjects exist.
+
         subjects = dict(
             Subject.objects.filter(
                 pk__in=[
                     self.prerequisite_id,
                     self.successor_id,
                 ]
-            ).values_list("pk", "program_id")
+            ).values_list(
+                "pk",
+                "program_id",
+            )
         )
 
         if (
@@ -270,6 +342,8 @@ class SubjectPrerequisite(models.Model):
                 "Select valid prerequisite and successor subjects."
             )
 
+        # Prevent cross-program relationships.
+
         if (
             subjects[self.prerequisite_id]
             != subjects[self.successor_id]
@@ -278,6 +352,8 @@ class SubjectPrerequisite(models.Model):
             raise ValidationError(
                 "Both subjects must belong to the same program."
             )
+
+        # Prevent duplicate relationships.
 
         edges = SubjectPrerequisite.objects.exclude(
             pk=self.pk
@@ -292,6 +368,8 @@ class SubjectPrerequisite(models.Model):
                 "This prerequisite relationship already exists."
             )
 
+        # Build the prerequisite dependency graph.
+
         graph = {}
 
         for source, target in edges.values_list(
@@ -299,9 +377,15 @@ class SubjectPrerequisite(models.Model):
             "successor_id",
         ):
 
-            graph.setdefault(source, []).append(target)
+            graph.setdefault(
+                source,
+                [],
+            ).append(target)
+
+        # Prevent circular prerequisite chains.
 
         pending = [self.successor_id]
+
         visited = set()
 
         while pending:
@@ -326,6 +410,139 @@ class SubjectPrerequisite(models.Model):
     def __str__(self):
 
         return (
-            f"{self.prerequisite.code} → "
+            f"{self.prerequisite.code} \u2192 "
             f"{self.successor.code}"
+        )
+
+
+# ========================================
+# 08 | COMPETENCY IMPACT
+# PHASE 07H.1
+# ========================================
+
+class CompetencyImpact(models.Model):
+
+    class Relevance(models.IntegerChoices):
+
+        LOW = 1, "Low"
+        MEDIUM = 2, "Medium"
+        HIGH = 3, "High"
+
+    prerequisite = models.ForeignKey(
+        SubjectPrerequisite,
+        on_delete=models.PROTECT,
+        related_name="competency_impacts",
+    )
+
+    subject_competency = models.ForeignKey(
+        SubjectCompetency,
+        on_delete=models.PROTECT,
+        related_name="competency_impacts",
+    )
+
+    relevance = models.PositiveSmallIntegerField(
+        choices=Relevance.choices,
+        default=Relevance.MEDIUM,
+    )
+
+    class Meta:
+
+        ordering = [
+            "prerequisite__prerequisite__code",
+            "prerequisite__successor__code",
+            "subject_competency__competency__code",
+            "pk",
+        ]
+
+        constraints = [
+
+            models.UniqueConstraint(
+                fields=[
+                    "prerequisite",
+                    "subject_competency",
+                ],
+                name="unique_competency_impact",
+            ),
+
+            models.CheckConstraint(
+                condition=models.Q(
+                    relevance__range=(1, 3)
+                ),
+                name="valid_impact_relevance",
+            ),
+
+        ]
+
+    def clean(self):
+
+        super().clean()
+
+        if not self.prerequisite_id:
+
+            return
+
+        if not self.subject_competency_id:
+
+            return
+
+        # Verify the prerequisite relationship.
+
+        prerequisite = (
+            SubjectPrerequisite.objects
+            .filter(
+                pk=self.prerequisite_id
+            )
+            .first()
+        )
+
+        # Verify the competency mapping.
+
+        mapping = (
+            SubjectCompetency.objects
+            .filter(
+                pk=self.subject_competency_id
+            )
+            .first()
+        )
+
+        if prerequisite is None or mapping is None:
+
+            raise ValidationError(
+                "Select valid academic relationships."
+            )
+
+        # Ensure that the competency belongs to
+        # the selected prerequisite subject.
+
+        if mapping.subject_id != prerequisite.prerequisite_id:
+
+            raise ValidationError({
+
+                "subject_competency": (
+                    "The competency must belong to "
+                    "the selected prerequisite subject."
+                )
+
+            })
+
+        # Prevent duplicate competency impacts.
+
+        duplicate = CompetencyImpact.objects.filter(
+            prerequisite_id=self.prerequisite_id,
+            subject_competency_id=self.subject_competency_id,
+        ).exclude(
+            pk=self.pk
+        )
+
+        if duplicate.exists():
+
+            raise ValidationError(
+                "This competency impact already exists."
+            )
+
+    def __str__(self):
+
+        return (
+            f"{self.subject_competency} -> "
+            f"{self.prerequisite.successor.code}"
         )
