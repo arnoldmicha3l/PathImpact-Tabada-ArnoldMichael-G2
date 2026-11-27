@@ -1,0 +1,347 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="robots"
+          content="noindex, nofollow">
+
+    <title>
+        {% block title %}Error{% endblock %} | PathImpact
+    </title>
+
+    <style>
+
+        :root {
+            --primary: #800020;
+            --primary-hover: #650019;
+            --background: #f5f5f5;
+            --surface: #ffffff;
+            --border: #e4e4e7;
+            --text: #18181b;
+            --muted: #71717a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            min-height: 100vh;
+            min-height: 100dvh;
+
+            display: flex;
+            flex-direction: column;
+
+            background: var(--background);
+            color: var(--text);
+
+            font-family: "Segoe UI", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .error-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            min-height: 64px;
+            padding: 14px 32px;
+
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        .error-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+
+            color: #ffffff;
+
+            font-size: 21px;
+            font-weight: 650;
+            letter-spacing: -.5px;
+
+            text-decoration: none;
+        }
+
+        .error-brand svg {
+            width: 29px;
+            height: 29px;
+
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .error-header-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, .8);
+        }
+
+        .error-main {
+            flex: 1;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 40px 20px;
+        }
+
+        .error-card {
+            width: 100%;
+            max-width: 470px;
+
+            padding: 42px 36px;
+
+            background: var(--surface);
+
+            border: 1px solid var(--border);
+            border-radius: 12px;
+
+            text-align: center;
+
+            box-shadow: 0 5px 24px rgba(0, 0, 0, .035);
+        }
+
+        .error-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 68px;
+            height: 68px;
+
+            margin: 0 auto 22px;
+
+            background: #f8e9ed;
+            color: var(--primary);
+
+            border-radius: 16px;
+        }
+
+        .error-icon svg {
+            width: 33px;
+            height: 33px;
+
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .error-code {
+            margin: 0 0 9px;
+
+            color: var(--primary);
+
+            font-size: 42px;
+            font-weight: 700;
+            letter-spacing: -2px;
+            line-height: 1.1;
+        }
+
+        .error-title {
+            margin: 0 0 13px;
+
+            font-size: 24px;
+            font-weight: 650;
+            letter-spacing: -.6px;
+        }
+
+        .error-description {
+            margin: 0 auto 27px;
+
+            max-width: 340px;
+
+            color: var(--muted);
+
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .error-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+
+            width: 100%;
+            min-height: 45px;
+            padding: 12px 18px;
+
+            background: var(--primary);
+            color: #ffffff;
+
+            border: 1px solid var(--primary);
+            border-radius: 6px;
+
+            font-size: 13px;
+            font-weight: 600;
+
+            text-decoration: none;
+
+            transition: background .15s ease;
+        }
+
+        .error-button:hover {
+            background: var(--primary-hover);
+        }
+
+        .error-button:focus-visible,
+        .error-brand:focus-visible {
+            outline: 3px solid #a45a70;
+            outline-offset: 4px;
+        }
+
+        .error-button svg {
+            width: 17px;
+            height: 17px;
+
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .error-footer {
+            padding: 20px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+
+            .error-header {
+                min-height: 58px;
+                padding: 12px 18px;
+            }
+
+            .error-header-label {
+                display: none;
+            }
+
+            .error-main {
+                padding: 24px 16px;
+            }
+
+            .error-card {
+                padding: 32px 24px;
+            }
+
+            .error-title {
+                font-size: 22px;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <header class="error-header">
+
+        <a class="error-brand" href="/">
+
+            <svg viewBox="0 0 24 24"
+                 aria-hidden="true">
+
+                <path d="m2 10 10-5 10 5-10 5-10-5z"/>
+
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+
+                <path d="M22 10v6"/>
+
+            </svg>
+
+            PathImpact
+
+        </a>
+
+        <span class="error-header-label">
+
+            Academic Planning System
+
+        </span>
+
+    </header>
+
+    <main class="error-main">
+
+        <section class="error-card"
+                 aria-labelledby="error-title">
+
+            <div class="error-icon">
+
+                {% block error_icon %}{% endblock %}
+
+            </div>
+
+            <div class="error-code">
+
+                {% block error_code %}{% endblock %}
+
+            </div>
+
+            <h1 class="error-title"
+                id="error-title">
+
+                {% block error_title %}{% endblock %}
+
+            </h1>
+
+            <p class="error-description">
+
+                {% block error_description %}{% endblock %}
+
+            </p>
+
+            <a href="/" class="error-button">
+
+                <svg viewBox="0 0 24 24"
+                     aria-hidden="true">
+
+                    <path d="m3 10 9-7 9 7"/>
+
+                    <path d="M5 9v12h14V9"/>
+
+                    <path d="M9 21v-8h6v8"/>
+
+                </svg>
+
+                Return to homepage
+
+            </a>
+
+        </section>
+
+    </main>
+
+    <footer class="error-footer">
+
+        PathImpact &middot; Academic Planning System
+
+    </footer>
+
+</body>
+
+</html>

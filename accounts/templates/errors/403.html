@@ -1,0 +1,28 @@
+
+{% extends "errors/base_error.html" %}
+
+{% block title %}Access denied{% endblock %}
+
+{% block error_code %}403{% endblock %}
+
+{% block error_title %}Access denied{% endblock %}
+
+{% block error_description %}
+You do not have permission to access this page.
+Please return to the homepage or sign in using
+an authorized account.
+{% endblock %}
+
+{% block error_icon %}
+
+<svg viewBox="0 0 24 24" aria-hidden="true">
+
+    <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/>
+
+    <path d="M12 8v5"/>
+
+    <path d="M12 17h.01"/>
+
+</svg>
+
+{% endblock %}
