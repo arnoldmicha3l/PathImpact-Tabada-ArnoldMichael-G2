@@ -1,0 +1,27 @@
+
+{% extends "errors/base_error.html" %}
+
+{% block title %}Invalid request{% endblock %}
+
+{% block error_code %}400{% endblock %}
+
+{% block error_title %}Invalid request{% endblock %}
+
+{% block error_description %}
+Your request could not be processed.
+Please return to the homepage and try again.
+{% endblock %}
+
+{% block error_icon %}
+
+<svg viewBox="0 0 24 24" aria-hidden="true">
+
+    <circle cx="12" cy="12" r="9"/>
+
+    <path d="M12 7v6"/>
+
+    <path d="M12 17h.01"/>
+
+</svg>
+
+{% endblock %}
