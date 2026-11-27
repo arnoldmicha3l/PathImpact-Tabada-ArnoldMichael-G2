@@ -6,12 +6,15 @@ from . import views
 from . import administrator_views
 from . import academic_views
 from . import prerequisite_views
+from . import competency_views
 
 
 app_name = "accounts"
 
 
 urlpatterns = [
+
+    # Authentication
 
     path(
         "register/",
@@ -37,6 +40,8 @@ urlpatterns = [
         name="logout",
     ),
 
+    # Dashboards
+
     path(
         "dashboard/",
         views.dashboard,
@@ -54,6 +59,8 @@ urlpatterns = [
         administrator_views.dashboard,
         name="administrator_dashboard",
     ),
+
+    # Academic programs
 
     path(
         "administrator/programs/",
@@ -79,6 +86,8 @@ urlpatterns = [
         name="program_delete",
     ),
 
+    # Academic subjects
+
     path(
         "administrator/subjects/",
         academic_views.subjects,
@@ -103,6 +112,8 @@ urlpatterns = [
         name="subject_delete",
     ),
 
+    # Prerequisites
+
     path(
         "administrator/prerequisites/",
         prerequisite_views.prerequisites,
@@ -126,6 +137,34 @@ urlpatterns = [
         prerequisite_views.prerequisite_delete,
         name="prerequisite_delete",
     ),
+
+    # Competencies
+
+    path(
+        "administrator/competencies/",
+        competency_views.competencies,
+        name="competencies",
+    ),
+
+    path(
+        "administrator/competencies/new/",
+        competency_views.competency_edit,
+        name="competency_create",
+    ),
+
+    path(
+        "administrator/competencies/<int:pk>/edit/",
+        competency_views.competency_edit,
+        name="competency_edit",
+    ),
+
+    path(
+        "administrator/competencies/<int:pk>/delete/",
+        competency_views.competency_delete,
+        name="competency_delete",
+    ),
+
+    # Account management
 
     path(
         "profile/",

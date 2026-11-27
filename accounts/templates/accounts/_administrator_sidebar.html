@@ -120,6 +120,35 @@
 
             </a>
 
+            <a href="{% url 'accounts:competencies' %}"
+               {% if current == "competencies" or current == "competency_create" or current == "competency_edit" or current == "competency_delete" %}
+                   class="mm-active"
+               {% endif %}
+               {% if current == "competencies" %}
+                   aria-current="page"
+               {% endif %}>
+
+                <svg class="mm-icon"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.7"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+
+                    <rect x="4" y="3" width="16" height="18" rx="2"/>
+                    <path d="m7 8 1.5 1.5L11 7"/>
+                    <path d="M13 9h4"/>
+                    <path d="m7 14 1.5 1.5L11 13"/>
+                    <path d="M13 15h4"/>
+
+                </svg>
+
+                <span>Competencies</span>
+
+            </a>
+
         </div>
 
         <div class="mm-nav-divider"></div>

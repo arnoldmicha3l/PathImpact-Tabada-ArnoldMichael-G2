@@ -1,0 +1,487 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Competencies{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+
+<style>
+
+.cm-workspace .cm-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.cm-workspace .cm-summary-card {
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+    padding: 20px;
+    min-width: 0;
+}
+
+.cm-workspace .cm-summary-label {
+    display: block;
+    color: #71717a;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.cm-workspace .cm-summary-value {
+    color: #18181b;
+    font-size: 30px;
+    font-weight: 650;
+    line-height: 1.2;
+    letter-spacing: -1px;
+}
+
+.cm-workspace .cm-summary-note {
+    color: #71717a;
+    font-size: 11px;
+    margin: 8px 0 0;
+}
+
+.cm-workspace .cm-description {
+    color: #71717a;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 5px;
+    max-width: 440px;
+    overflow-wrap: anywhere;
+}
+
+.cm-workspace .cm-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 9px;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+
+.cm-workspace .cm-status-mapped {
+    background: #edf5ef;
+    color: #356044;
+}
+
+.cm-workspace .cm-status-unmapped {
+    background: #f4f4f5;
+    color: #71717a;
+}
+
+.cm-workspace .cm-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.cm-workspace .cm-table {
+    min-width: 760px;
+}
+
+.cm-workspace .cm-name {
+    color: #27272a;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.cm-workspace .cm-locked {
+    color: #71717a;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.cm-workspace .cm-directory-note {
+    color: #71717a;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 16px;
+}
+
+@media (max-width: 850px) {
+
+    .cm-workspace .cm-summary-grid {
+        gap: 12px;
+    }
+
+    .cm-workspace .cm-summary-card {
+        padding: 16px;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .cm-workspace .cm-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cm-workspace .cm-summary-value {
+        font-size: 26px;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="am-workspace cm-workspace">
+
+    <header class="am-heading">
+
+        <div>
+
+            <h1>Competencies</h1>
+
+            <p>
+                Manage academic competency definitions
+                and monitor subject mapping coverage.
+            </p>
+
+        </div>
+
+        <a class="am-button am-primary"
+           href="{% url 'accounts:competency_create' %}">
+
+            + Add competency
+
+        </a>
+
+    </header>
+
+
+    <section class="cm-summary-grid"
+             aria-label="Competency summary">
+
+        <article class="cm-summary-card">
+
+            <span class="cm-summary-label">
+                Total competencies
+            </span>
+
+            <div class="cm-summary-value">
+                {{ total_count }}
+            </div>
+
+            <p class="cm-summary-note">
+                Defined academic competencies
+            </p>
+
+        </article>
+
+        <article class="cm-summary-card">
+
+            <span class="cm-summary-label">
+                Mapped competencies
+            </span>
+
+            <div class="cm-summary-value">
+                {{ mapped_count }}
+            </div>
+
+            <p class="cm-summary-note">
+                Linked to at least one subject
+            </p>
+
+        </article>
+
+        <article class="cm-summary-card">
+
+            <span class="cm-summary-label">
+                Unmapped competencies
+            </span>
+
+            <div class="cm-summary-value">
+                {{ unmapped_count }}
+            </div>
+
+            <p class="cm-summary-note">
+                Awaiting subject assignment
+            </p>
+
+        </article>
+
+    </section>
+
+
+    <section class="am-panel">
+
+        <div class="am-panel-heading">
+
+            <h2>Competency directory</h2>
+
+            <span>
+                {{ filtered_count }}
+                record{{ filtered_count|pluralize }}
+            </span>
+
+        </div>
+
+
+        <form method="get" class="am-toolbar">
+
+            <div class="am-search">
+
+                <input type="search"
+                       name="q"
+                       value="{{ query }}"
+                       placeholder="Search competencies..."
+                       aria-label="Search competencies">
+
+            </div>
+
+            <select name="status"
+                    aria-label="Filter by mapping status">
+
+                <option value="">
+                    All statuses
+                </option>
+
+                <option value="mapped"
+                        {% if selected_status == "mapped" %}
+                            selected
+                        {% endif %}>
+
+                    Mapped
+
+                </option>
+
+                <option value="unmapped"
+                        {% if selected_status == "unmapped" %}
+                            selected
+                        {% endif %}>
+
+                    Unmapped
+
+                </option>
+
+            </select>
+
+            <button type="submit"
+                    class="am-button am-primary">
+
+                Filter
+
+            </button>
+
+            <a href="{% url 'accounts:competencies' %}"
+               class="am-button">
+
+                Reset
+
+            </a>
+
+        </form>
+
+
+        <div class="am-table-wrap">
+
+            <table class="am-table cm-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th scope="col">Code</th>
+                        <th scope="col">Competency</th>
+                        <th scope="col">Subjects</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for item in page %}
+
+                    <tr>
+
+                        <td>
+
+                            <strong class="am-code">
+                                {{ item.code }}
+                            </strong>
+
+                        </td>
+
+                        <td>
+
+                            <div class="cm-name">
+                                {{ item.name }}
+                            </div>
+
+                            <div class="cm-description">
+                                {{ item.description|truncatechars:160 }}
+                            </div>
+
+                        </td>
+
+                        <td>
+                            {{ item.subject_count }}
+                        </td>
+
+                        <td>
+
+                            {% if item.subject_count %}
+
+                            <span class="cm-status cm-status-mapped">
+
+                                <span class="cm-status-dot"></span>
+
+                                Mapped
+
+                            </span>
+
+                            {% else %}
+
+                            <span class="cm-status cm-status-unmapped">
+
+                                <span class="cm-status-dot"></span>
+
+                                Unmapped
+
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <div class="am-actions">
+
+                                {% if item.subject_count %}
+
+                                <a class="am-button am-small"
+                                   href="{% url 'accounts:competency_edit' item.pk %}">
+
+                                    View
+
+                                </a>
+
+                                <span class="cm-locked">
+                                    Protected
+                                </span>
+
+                                {% else %}
+
+                                <a class="am-button am-small"
+                                   href="{% url 'accounts:competency_edit' item.pk %}">
+
+                                    Edit
+
+                                </a>
+
+                                <a class="am-button am-small am-danger"
+                                   href="{% url 'accounts:competency_delete' item.pk %}">
+
+                                    Delete
+
+                                </a>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="5">
+
+                            <div class="am-empty">
+
+                                <strong>
+                                    No competencies found
+                                </strong>
+
+                                <p>
+                                    Add a competency or adjust
+                                    your search filters.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <footer class="am-pagination">
+
+            <span>
+
+                Page {{ page.number }}
+                of {{ page.paginator.num_pages }}
+
+            </span>
+
+            <div class="am-actions">
+
+                {% if page.has_previous %}
+
+                <a class="am-button am-small"
+                   href="{% querystring page=page.previous_page_number %}">
+
+                    Previous
+
+                </a>
+
+                {% endif %}
+
+                {% if page.has_next %}
+
+                <a class="am-button am-small"
+                   href="{% querystring page=page.next_page_number %}">
+
+                    Next
+
+                </a>
+
+                {% endif %}
+
+            </div>
+
+        </footer>
+
+    </section>
+
+    <p class="cm-directory-note">
+
+        Competencies linked to academic subjects are protected
+        against modification and deletion to preserve the
+        consistency of assessment records.
+
+    </p>
+
+</div>
+
+{% endblock %}
