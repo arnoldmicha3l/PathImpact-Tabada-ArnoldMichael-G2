@@ -1,118 +1,294 @@
 {% load static %}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#122735">
-    <title>{% block title %}Academic pathways{% endblock %} | PathImpact</title>
-    <link rel="stylesheet" href="{% static 'accounts/pathimpact.css' %}">
-    <style>
-        .phase1-skip {
-            position: fixed;
-            z-index: 100;
-            top: .75rem;
-            left: .75rem;
-            padding: .6rem 1rem;
-            border: 2px solid #195446;
-            border-radius: .4rem;
-            background: #fffdf7;
-            color: #195446;
-            transform: translateY(-200%);
-        }
-        .phase1-skip:focus { transform: none; }
+    <meta charset="UTF-8">
 
-        .phase1-brand-mark svg {
-            display: block;
-            width: 1.2rem;
-            height: 1.2rem;
-        }
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-        .phase1-notices {
-            display: grid;
-            gap: .5rem;
-            margin: 0 0 1rem;
-        }
-        .phase1-notice {
-            display: flex;
-            align-items: baseline;
-            flex-wrap: wrap;
-            gap: .25rem .65rem;
-            padding: .75rem 1rem;
-            border: 1px solid #b7cec2;
-            border-inline-start: .25rem solid #195446;
-            border-radius: .5rem;
-            background: #e8f1ec;
-            color: #173d34;
-            overflow-wrap: anywhere;
-        }
-        .phase1-notice--error {
-            border-color: #d2a39b;
-            border-inline-start-color: #8b3226;
-            background: #fff2ed;
-            color: #76291f;
-        }
-        .phase1-notice--warning {
-            border-color: #d5bd90;
-            border-inline-start-color: #846023;
-            background: #fff5df;
-            color: #624616;
-        }
-    </style>
+    <meta name="theme-color" content="#800020">
+
+    <title>
+        {% block title %}Workspace{% endblock %} | PathImpact
+    </title>
+
+    <link rel="stylesheet"
+          href="{% static 'accounts/pathimpact.css' %}?v=phase05-restored">
+
+    {% block extra_head %}{% endblock %}
+
+    <link rel="stylesheet"
+          href="{% static 'accounts/workspace.css' %}?v=phase05-restored">
+
 </head>
-<body class="{% block body_class %}{% endblock %}">
+
+<body class="{% if user.is_authenticated %}mm-authenticated{% else %}mm-public{% endif %} {% block body_class %}{% endblock %}">
+
     {% block shell %}
-    <a class="phase1-skip" href="#main">Skip to content</a>
 
-    <header class="topbar">
-        <a class="logo" href="{% url 'home' %}">
-            <span class="logo-mark phase1-brand-mark" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <path d="M5 18h4l6-7h4"
-                          stroke="#fffdf7" stroke-width="1.7"
-                          stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="5" cy="18" r="2" fill="#e7b47c"/>
-                    <circle cx="19" cy="11" r="2" fill="#a8e8ce"/>
-                </svg>
-            </span>
-            <span>Path<b>Impact</b></span>
-        </a>
+    <a href="#main" class="workspace-skip">
+        Skip to content
+    </a>
 
-        <input type="checkbox" id="nav-toggle" class="nav-toggle"
-               aria-label="Toggle navigation" aria-controls="primary-nav">
-        <label for="nav-toggle" class="burger" aria-hidden="true">&#9776;</label>
+    {% if user.is_authenticated %}
 
-        <nav id="primary-nav" class="links" aria-label="Main navigation">
-            {% with rn=request.resolver_match.url_name %}
-                {% if user.is_authenticated %}
-                    <a href="{% url 'accounts:dashboard' %}"{% if rn and 'dashboard' in rn %} class="active" aria-current="page"{% endif %}>Dashboard</a>
-                    <a href="{% url 'accounts:profile' %}"{% if rn and 'profile' in rn %} class="active"{% endif %}{% if rn == 'profile' %} aria-current="page"{% endif %}>My profile</a>
+        <header class="mm-header">
 
-                    <span class="user-chip">
-                        <i aria-hidden="true">{{ user.username|slice:":1"|upper }}</i>
-                        {{ user.get_role_display }}
-                    </span>
+            <div class="mm-brand-area">
 
-                    <form method="post" action="{% url 'accounts:logout' %}">
-                        {% csrf_token %}
-                        <button class="btn-ghost" type="submit">Log out</button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'accounts:login' %}"{% if rn == 'login' %} class="active" aria-current="page"{% endif %}>Log in</a>
-                    <a href="{% url 'accounts:register' %}"{% if rn == 'register' %} class="active" aria-current="page"{% endif %}>Create account</a>
-                {% endif %}
-            {% endwith %}
-        </nav>
-    </header>
+                <button type="button"
+                        class="mm-menu-toggle"
+                        id="sidebar-toggle"
+                        aria-label="Toggle navigation"
+                        aria-controls="workspace-sidebar"
+                        aria-expanded="false">
+
+                    <svg width="20"
+                         height="20"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         aria-hidden="true">
+
+                        <path d="M4 6h16M4 12h16M4 18h16"/>
+
+                    </svg>
+
+                </button>
+
+                <a class="mm-brand"
+                   href="{% url 'accounts:dashboard' %}">
+                    PathImpact
+                </a>
+
+            </div>
+
+            <div class="mm-header-actions">
+
+                <details class="mm-account" id="account-menu">
+
+                    <summary>
+
+                        <span class="mm-account-role">
+                            {{ user.get_role_display }}
+                        </span>
+
+                        <span class="mm-avatar" aria-hidden="true">
+                            {{ user.username|first|upper }}
+                        </span>
+
+                        <svg class="mm-chevron"
+                             width="16"
+                             height="16"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.8"
+                             aria-hidden="true">
+
+                            <path d="m6 9 6 6 6-6"/>
+
+                        </svg>
+
+                    </summary>
+
+                    <div class="mm-account-menu">
+
+                        <div class="mm-account-info">
+
+                            <strong>
+                                {{ user.get_full_name|default:user.username }}
+                            </strong>
+
+                            <span>{{ user.email }}</span>
+
+                        </div>
+
+                        <a href="{% url 'accounts:profile' %}">
+                            My profile
+                        </a>
+
+                        <a href="{% url 'accounts:edit_profile' %}">
+                            Edit profile
+                        </a>
+
+                        <form method="post"
+                              action="{% url 'accounts:logout' %}">
+
+                            {% csrf_token %}
+
+                            <button type="submit">
+                                Log out
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </details>
+
+            </div>
+
+        </header>
+
+        {% include "accounts/_sidebar.html" %}
+
+        <button type="button"
+                class="mm-backdrop"
+                id="sidebar-backdrop"
+                aria-label="Close navigation"
+                hidden>
+        </button>
+
+    {% else %}
+
+        <header class="mm-public-header">
+
+            <a href="{% url 'home' %}" class="mm-brand">
+                PathImpact
+            </a>
+
+            <nav aria-label="Main navigation">
+
+                <a href="{% url 'accounts:login' %}">
+                    Sign in
+                </a>
+
+                <a href="{% url 'accounts:register' %}">
+                    Create account
+                </a>
+
+            </nav>
+
+        </header>
+
+    {% endif %}
 
     <main class="page" id="main" tabindex="-1">
+
         {% include "accounts/_messages.html" %}
+
         {% block content %}{% endblock %}
+
     </main>
 
-    <footer class="footer">
-        PathImpact &middot; Academic Prerequisite Impact and Readiness Analyzer
-    </footer>
     {% endblock %}
+
+    <script>
+        (function () {
+
+            const sidebar = document.getElementById(
+                "workspace-sidebar"
+            );
+
+            const toggle = document.getElementById(
+                "sidebar-toggle"
+            );
+
+            const backdrop = document.getElementById(
+                "sidebar-backdrop"
+            );
+
+            const account = document.getElementById(
+                "account-menu"
+            );
+
+            function setSidebar(open) {
+
+                if (!sidebar || !toggle || !backdrop) {
+                    return;
+                }
+
+                sidebar.classList.toggle("is-open", open);
+
+                toggle.setAttribute(
+                    "aria-expanded",
+                    String(open)
+                );
+
+                backdrop.hidden = !open;
+
+                document.body.classList.toggle(
+                    "sidebar-open",
+                    open
+                );
+
+            }
+
+            if (toggle && sidebar) {
+
+                toggle.addEventListener("click", function () {
+
+                    setSidebar(
+                        !sidebar.classList.contains("is-open")
+                    );
+
+                });
+
+            }
+
+            if (backdrop) {
+
+                backdrop.addEventListener("click", function () {
+
+                    setSidebar(false);
+                    toggle.focus();
+
+                });
+
+            }
+
+            document.addEventListener("keydown", function (event) {
+
+                if (event.key === "Escape") {
+
+                    if (sidebar &&
+                        sidebar.classList.contains("is-open")) {
+
+                        setSidebar(false);
+                        toggle.focus();
+
+                    }
+
+                    if (account && account.open) {
+
+                        account.open = false;
+
+                        account.querySelector("summary").focus();
+
+                    }
+
+                }
+
+            });
+
+            document.addEventListener("click", function (event) {
+
+                if (account &&
+                    account.open &&
+                    !account.contains(event.target)) {
+
+                    account.open = false;
+
+                }
+
+            });
+
+            window.addEventListener("resize", function () {
+
+                if (window.innerWidth > 800) {
+                    setSidebar(false);
+                }
+
+            });
+
+        })();
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+
 </body>
 </html>

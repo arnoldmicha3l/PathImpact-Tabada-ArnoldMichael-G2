@@ -1,8 +1,251 @@
+
 {% extends "accounts/base.html" %}
-{% block title %}Saved attempt · PathImpact{% endblock %}
+{% load static %}
+
+{% block title %}Assessment results{% endblock %}
+
 {% block content %}
-<header class="intro"><p class="eyebrow">PRIVATE SELF-ASSESSMENT</p><h1>Attempt {{ attempt.pk }}</h1><p>Completed {{ attempt.completed_at|date:"M j, Y · g:i A" }}. Your responses are saved to your account.</p></header>
-<section class="card narrow"><h2>Your self-ratings</h2><dl>
-{% for response in responses %}<dt>{{ response.subject_competency.competency.name }}</dt><dd>{{ response.get_self_rating_display }}</dd>{% endfor %}
-</dl><div class="form-actions"><a class="btn" href="{% url 'assessment_edit' attempt.pk %}">Edit ratings</a><a class="btn quiet" href="{% url 'assessment_delete' attempt.pk %}">Delete attempt</a><a href="{% url 'assessment_index' %}">Back to history</a></div></section>
+
+<link rel="stylesheet"
+      href="{% static 'accounts/assessments.css' %}?v=20261127-07">
+
+<link rel="stylesheet"
+      href="{% static 'accounts/results.css' %}?v=20261127-05">
+
+<div class="pa-workspace pr-workspace">
+
+    <header class="pa-heading">
+
+        <div>
+            <h1>Assessment results</h1>
+
+            <p>
+                Assessment #{{ attempt.pk }}
+                &middot;
+                {{ attempt.started_at|date:"M j, Y" }}
+            </p>
+        </div>
+
+        <div class="pa-actions">
+
+            <a class="pa-button pa-button-secondary"
+               href="{% url 'assessment_index' %}">
+                Back to history
+            </a>
+
+            <a class="pa-button"
+               href="{% url 'assessment_edit' attempt.pk %}">
+                Edit assessment
+            </a>
+
+        </div>
+
+    </header>
+
+    <div class="pr-summary-grid">
+
+        <section class="pr-summary-card">
+
+            <h2>Average self-rating</h2>
+
+            {% if response_count %}
+
+                <div class="pr-ring-wrap">
+
+                    <svg class="pr-ring"
+                         viewBox="0 0 120 120"
+                         aria-hidden="true">
+
+                        <circle class="pr-ring-track"
+                                cx="60" cy="60" r="48"/>
+
+                        <circle class="pr-ring-value"
+                                cx="60" cy="60" r="48"
+                                pathLength="100"
+                                stroke-dasharray="{% widthratio average_rating 5 100 %} 100"
+                                transform="rotate(-90 60 60)"/>
+
+                    </svg>
+
+                    <div class="pr-ring-label">
+                        <strong>
+                            {{ average_rating|floatformat:1 }}
+                        </strong>
+                        <span>out of 5</span>
+                    </div>
+
+                </div>
+
+            {% else %}
+
+                <div class="pr-no-rating">
+                    &mdash;
+                </div>
+
+            {% endif %}
+
+            <p>Based on your saved competency ratings.</p>
+
+        </section>
+
+        <section class="pr-summary-card">
+
+            <h2>Assessment summary</h2>
+
+            <dl class="pr-summary-list">
+
+                <div>
+                    <dt>Competencies assessed</dt>
+                    <dd>{{ response_count }}</dd>
+                </div>
+
+                <div>
+                    <dt>Status</dt>
+                    <dd>
+                        {% if attempt.completed_at %}
+                            <span class="pr-status pr-completed">
+                                Completed
+                            </span>
+                        {% else %}
+                            <span class="pr-status pr-pending">
+                                Incomplete
+                            </span>
+                        {% endif %}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Date created</dt>
+                    <dd>
+                        {{ attempt.started_at|date:"M j, Y" }}
+                    </dd>
+                </div>
+
+                <div>
+                    <dt>Date completed</dt>
+                    <dd>
+                        {% if attempt.completed_at %}
+                            {{ attempt.completed_at|date:"M j, Y" }}
+                        {% else %}
+                            &mdash;
+                        {% endif %}
+                    </dd>
+                </div>
+
+            </dl>
+
+        </section>
+
+        <section class="pr-summary-card">
+
+            <h2>Rating distribution</h2>
+
+            <div class="pr-distribution">
+
+                {% for item in rating_distribution %}
+
+                    <div class="pr-distribution-row">
+
+                        <span>{{ item.rating }}</span>
+
+                        <div class="pr-track">
+                            <div class="pr-fill"
+                                 style="width: {% if response_count %}{% widthratio item.count response_count 100 %}{% else %}0{% endif %}%;">
+                            </div>
+                        </div>
+
+                        <strong>{{ item.count }}</strong>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <p>Number of responses at each rating level.</p>
+
+        </section>
+
+    </div>
+
+    <section class="pa-panel">
+
+        <div class="pa-panel-header">
+            <h2>Competency breakdown</h2>
+        </div>
+
+        <div class="pr-competency-list">
+
+            {% for response in responses %}
+
+                <article class="pr-competency">
+
+                    <div class="pr-competency-heading">
+
+                        <div>
+                            <h3>
+                                {{ response.subject_competency.competency.name }}
+                            </h3>
+
+                            <span class="pr-muted">
+                                {{ response.subject_competency.subject.code }}
+                                &middot;
+                                {{ response.subject_competency.subject.name }}
+                            </span>
+                        </div>
+
+                        <strong class="pr-rating-value">
+                            {{ response.self_rating }}/5
+                        </strong>
+
+                    </div>
+
+                    <div class="pr-track"
+                         role="meter"
+                         aria-label="{{ response.subject_competency.competency.name }}"
+                         aria-valuemin="0"
+                         aria-valuemax="5"
+                         aria-valuenow="{{ response.self_rating }}">
+
+                        <div class="pr-fill"
+                             style="width: {% widthratio response.self_rating 5 100 %}%;">
+                        </div>
+
+                    </div>
+
+                    <p class="pr-rating-label">
+                        {{ response.get_self_rating_display }}
+                    </p>
+
+                </article>
+
+            {% empty %}
+
+                <div class="pr-empty">
+                    <h3>No saved responses</h3>
+                    <p>This assessment has no competency ratings.</p>
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+    <div class="pr-bottom">
+
+        <p class="pr-disclaimer">
+            These results are self-reported competency ratings,
+            not official grades or prerequisite readiness scores.
+        </p>
+
+        <a class="pr-action pr-delete"
+           href="{% url 'assessment_delete' attempt.pk %}">
+            Delete assessment
+        </a>
+
+    </div>
+
+</div>
+
 {% endblock %}

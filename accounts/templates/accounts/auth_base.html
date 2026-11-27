@@ -1,0 +1,91 @@
+﻿
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}PathImpact{% endblock %}</title>
+
+    <link rel="stylesheet"
+          href="{% static 'accounts/auth.css' %}?v=final07">
+</head>
+
+<body class="pi-auth-page">
+
+    <header class="auth-header">
+        <div class="auth-header-inner">
+
+            <a href="{% url 'home' %}" class="auth-brand">
+                PathImpact
+            </a>
+
+            <a href="{% url 'home' %}" class="auth-back">
+                Back to home
+            </a>
+
+        </div>
+    </header>
+
+    <main class="auth-main">
+
+        <aside class="auth-campus" aria-hidden="true"></aside>
+
+        <section class="auth-form-area" aria-labelledby="auth-title">
+
+            <div class="auth-box">
+
+                {% if messages %}
+                    <div class="auth-messages" aria-live="polite">
+                        {% for message in messages %}
+                            <div class="auth-message {{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script>
+        document.querySelectorAll("[data-password-toggle]")
+            .forEach(function (button) {
+
+                button.addEventListener("click", function () {
+
+                    const input = document.getElementById(
+                        button.dataset.passwordToggle
+                    );
+
+                    if (!input) return;
+
+                    const visible = input.type === "password";
+
+                    input.type = visible ? "text" : "password";
+
+                    button.setAttribute(
+                        "aria-label",
+                        visible ? "Hide password" : "Show password"
+                    );
+
+                    button.setAttribute(
+                        "aria-pressed",
+                        String(visible)
+                    );
+
+                    button.classList.toggle("is-visible", visible);
+
+                });
+
+            });
+    </script>
+
+</body>
+</html>

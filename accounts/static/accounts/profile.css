@@ -1,0 +1,388 @@
+
+/* ==================================================
+   PATHIMPACT
+   Phase 06 - Profile and Edit Profile
+   Scoped styles only
+   ================================================== */
+
+.pp-workspace {
+    --pp-primary: #800020;
+    --pp-hover: #650019;
+    --pp-text: #171717;
+    --pp-muted: #71717a;
+    --pp-border: #e0e0e4;
+    --pp-surface: #ffffff;
+    --pp-soft: #f7edef;
+
+    width: 100%;
+    max-width: 1100px;
+    min-width: 0;
+    margin: 0 auto;
+    padding: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: var(--pp-text);
+}
+
+.pp-workspace,
+.pp-workspace * {
+    box-sizing: border-box;
+}
+
+
+/* Page heading */
+
+.pp-workspace .pp-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 20px;
+    padding: 0;
+}
+
+.pp-workspace .pp-heading h1 {
+    margin: 0;
+    color: var(--pp-text);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.6px;
+}
+
+
+/* Main card */
+
+.pp-workspace .pp-card {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: var(--pp-surface);
+    border: 1px solid var(--pp-border);
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+
+/* Profile identity */
+
+.pp-workspace .pp-identity {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px;
+    border-bottom: 1px solid var(--pp-border);
+}
+
+.pp-workspace .pp-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 64px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--pp-primary);
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.pp-workspace .pp-identity-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.pp-workspace .pp-identity-info h2 {
+    margin: 0 0 7px;
+    color: var(--pp-text);
+    font-size: 20px;
+    font-weight: 650;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.pp-workspace .pp-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border-radius: 4px;
+    background: var(--pp-soft);
+    color: var(--pp-primary);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* Information sections */
+
+.pp-workspace .pp-section {
+    padding: 24px;
+    border-bottom: 1px solid var(--pp-border);
+}
+
+.pp-workspace .pp-section:last-child {
+    border-bottom: 0;
+}
+
+.pp-workspace .pp-section h2 {
+    margin: 0 0 22px;
+    color: var(--pp-text);
+    font-size: 16px;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.pp-workspace .pp-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 32px;
+    margin: 0;
+    padding: 0;
+}
+
+.pp-workspace .pp-detail {
+    min-width: 0;
+    margin: 0;
+}
+
+.pp-workspace .pp-detail dt {
+    margin: 0 0 7px;
+    color: var(--pp-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.pp-workspace .pp-detail dd {
+    margin: 0;
+    color: var(--pp-text);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+
+/* Edit profile form */
+
+.pp-workspace .pp-form {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.pp-workspace .pp-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 24px;
+}
+
+.pp-workspace .pp-field {
+    min-width: 0;
+}
+
+.pp-workspace .pp-field-full {
+    grid-column: 1 / -1;
+}
+
+.pp-workspace .pp-field label {
+    display: block;
+    margin: 0 0 8px;
+    color: var(--pp-text);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.pp-workspace .pp-required {
+    color: var(--pp-primary);
+}
+
+.pp-workspace .pp-field input {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: 43px;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid #d4d4d8;
+    border-radius: 5px;
+    background: #ffffff;
+    color: var(--pp-text);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: normal;
+    box-shadow: none;
+    transition: border-color 150ms ease,
+                box-shadow 150ms ease;
+}
+
+.pp-workspace .pp-field input:focus {
+    outline: none;
+    border-color: var(--pp-primary);
+    box-shadow: 0 0 0 3px rgba(128, 0, 32, 0.08);
+}
+
+.pp-workspace .pp-field input[aria-invalid="true"] {
+    border-color: #b42318;
+}
+
+.pp-workspace .pp-help {
+    margin-top: 7px;
+    color: var(--pp-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.pp-workspace .pp-error {
+    margin: 7px 0 0;
+    color: #b42318;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.pp-workspace .pp-error-summary {
+    margin-bottom: 18px;
+    padding: 12px 16px;
+    border: 1px solid #f1c4c4;
+    border-radius: 5px;
+    background: #fff4f4;
+    color: #b42318;
+    font-size: 13px;
+}
+
+.pp-workspace .pp-error-summary ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+
+/* Buttons */
+
+.pp-workspace .pp-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    margin: 0;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background-color 150ms ease;
+}
+
+.pp-workspace .pp-button svg {
+    display: block;
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.pp-workspace .pp-primary {
+    border-color: var(--pp-primary);
+    background: var(--pp-primary);
+    color: #ffffff;
+}
+
+.pp-workspace .pp-primary:hover {
+    border-color: var(--pp-hover);
+    background: var(--pp-hover);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.pp-workspace .pp-secondary {
+    border-color: var(--pp-border);
+    background: #ffffff;
+    color: #3f3f46;
+}
+
+.pp-workspace .pp-secondary:hover {
+    background: #f7f7f8;
+    color: var(--pp-text);
+    text-decoration: none;
+}
+
+.pp-workspace .pp-button:focus-visible {
+    outline: 2px solid var(--pp-primary);
+    outline-offset: 3px;
+}
+
+
+/* Form footer */
+
+.pp-workspace .pp-form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 18px 24px;
+    background: #fafafa;
+    border-radius: 0 0 8px 8px;
+}
+
+
+/* Responsive layout */
+
+@media (max-width: 700px) {
+
+    .pp-workspace .pp-heading h1 {
+        font-size: 25px;
+    }
+
+    .pp-workspace .pp-identity {
+        flex-wrap: wrap;
+        padding: 20px;
+        gap: 14px;
+    }
+
+    .pp-workspace .pp-avatar {
+        flex-basis: 54px;
+        width: 54px;
+        height: 54px;
+        font-size: 22px;
+    }
+
+    .pp-workspace .pp-identity-info h2 {
+        font-size: 18px;
+    }
+
+    .pp-workspace .pp-section {
+        padding: 20px;
+    }
+
+    .pp-workspace .pp-details,
+    .pp-workspace .pp-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
+    }
+
+    .pp-workspace .pp-form-footer {
+        padding: 16px 20px;
+    }
+
+}
+
+@media (max-width: 400px) {
+
+    .pp-workspace .pp-identity > .pp-button {
+        width: 100%;
+    }
+
+    .pp-workspace .pp-form-footer > .pp-button {
+        flex: 1;
+    }
+
+}
