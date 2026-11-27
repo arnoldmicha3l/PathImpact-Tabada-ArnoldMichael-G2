@@ -297,6 +297,31 @@
 
             </a>
 
+            <a href="{% url 'accounts:analysis_rules' %}"
+               {% if current == "analysis_rules" %}
+                   class="mm-active"
+                   aria-current="page"
+               {% endif %}>
+
+                <svg class="mm-icon"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.7"
+                     aria-hidden="true">
+
+                    <rect x="4" y="3"
+                          width="16" height="18"
+                          rx="2"/>
+
+                    <path d="M8 7h8M8 11h2M14 11h2M8 15h2M14 15h2M8 18h8"/>
+
+                </svg>
+
+                <span>Analysis Rules</span>
+
+            </a>
+
         </div>
 
         <div class="mm-nav-divider"></div>

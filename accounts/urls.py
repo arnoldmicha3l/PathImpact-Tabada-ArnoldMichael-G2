@@ -15,7 +15,17 @@ from . import report_views
 app_name = "accounts"
 
 
+from . import analysis_rule_views
+
+
 urlpatterns = [
+
+    path(
+        "administrator/analysis-rules/",
+        analysis_rule_views.analysis_rules,
+        name="analysis_rules",
+    ),
+
 
     # ========================================
     # AUTHENTICATION

@@ -1,0 +1,730 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Analysis Rules | PathImpact{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+
+<link rel="stylesheet"
+      href="{% static 'accounts/analysis_rules.css' %}?v=07h3">
+
+{% endblock %}
+
+{% block content %}
+
+<div class="am-workspace rules-workspace">
+
+    <header class="rules-heading">
+
+        <div>
+
+            <div class="rules-eyebrow">
+                SYSTEM MANAGEMENT
+            </div>
+
+            <h1>Analysis Rules</h1>
+
+            <p>
+                Understand the decision-support logic
+                used to evaluate academic preparation.
+            </p>
+
+        </div>
+
+        <span class="rules-version">
+            Version {{ rule_version }}
+        </span>
+
+    </header>
+
+
+    <!-- OVERVIEW -->
+
+    <section class="rules-metrics"
+             aria-label="Analysis rules overview">
+
+        <article class="rules-metric">
+
+            <span>Rule version</span>
+
+            <strong>{{ rule_version }}</strong>
+
+            <small>Current calculation engine</small>
+
+        </article>
+
+        <article class="rules-metric">
+
+            <span>Self-rating scale</span>
+
+            <strong>
+                {{ minimum_rating }} - {{ maximum_rating }}
+            </strong>
+
+            <small>Student-reported competency</small>
+
+        </article>
+
+        <article class="rules-metric">
+
+            <span>Relevance scale</span>
+
+            <strong>1 - 3</strong>
+
+            <small>Defined academic relationships</small>
+
+        </article>
+
+        <article class="rules-metric">
+
+            <span>Analysis type</span>
+
+            <strong>Advisory</strong>
+
+            <small>Academic decision support</small>
+
+        </article>
+
+    </section>
+
+
+    <!-- RATING AND RELEVANCE -->
+
+    <div class="rules-grid rules-grid-main">
+
+        <section class="rules-panel">
+
+            <div class="rules-panel-heading">
+
+                <h2>Competency self-rating</h2>
+
+                <p>
+                    How student responses are interpreted.
+                </p>
+
+            </div>
+
+            <div class="rules-table-wrap">
+
+                <table class="rules-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Rating</th>
+
+                            <th>Interpretation</th>
+
+                            <th>Gap status</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for item in rating_rows %}
+
+                        <tr>
+
+                            <td>
+
+                                <span class="rules-rating">
+                                    {{ item.rating }}
+                                </span>
+
+                            </td>
+
+                            <td>
+                                {{ item.description }}
+                            </td>
+
+                            <td>
+
+                                {% if item.is_gap %}
+
+                                <span class="rules-pill
+                                             rules-pill-gap">
+                                    Review
+                                </span>
+
+                                {% else %}
+
+                                <span class="rules-pill
+                                             rules-pill-neutral">
+                                    No gap
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="rules-panel-note">
+
+                Ratings {{ minimum_rating }} through
+                {{ gap_threshold }} are identified as
+                competency gaps for review planning.
+
+            </div>
+
+        </section>
+
+
+        <section class="rules-panel">
+
+            <div class="rules-panel-heading">
+
+                <h2>Competency relevance</h2>
+
+                <p>
+                    Importance of a prerequisite competency
+                    to a succeeding subject.
+                </p>
+
+            </div>
+
+            <div class="rules-relevance">
+
+                {% for item in relevance_rows %}
+
+                <div class="rules-relevance-row">
+
+                    <div>
+
+                        <strong>{{ item.label }}</strong>
+
+                        <small>
+                            Weight {{ item.weight }}
+                        </small>
+
+                    </div>
+
+                    <div class="rules-weight-blocks"
+                         aria-label="Weight {{ item.weight }}">
+
+                        {% for value in "123" %}
+
+                            {% if forloop.counter <= item.weight %}
+
+                            <span class="is-filled"></span>
+
+                            {% else %}
+
+                            <span></span>
+
+                            {% endif %}
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="rules-panel-note">
+
+                Higher relevance increases a competency's
+                contribution to readiness and review priority.
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- READINESS CLASSIFICATION -->
+
+    <section class="rules-panel">
+
+        <div class="rules-panel-heading">
+
+            <h2>Readiness classification</h2>
+
+            <p>
+                Readiness levels are based on the unrounded
+                weighted average of required self-ratings.
+            </p>
+
+        </div>
+
+        <div class="rules-classifications">
+
+            {% for item in readiness_rows %}
+
+            <div class="rules-classification">
+
+                <span class="rules-status-dot
+                             rules-{{ item.style }}">
+                </span>
+
+                <div class="rules-classification-name">
+
+                    <strong>{{ item.level }}</strong>
+
+                    <small>Advisory readiness level</small>
+
+                </div>
+
+                <span class="rules-range">
+                    {{ item.range }}
+                </span>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <div class="rules-panel-note">
+
+            Missing required ratings produce insufficient
+            information. Subjects without defined impacts
+            do not receive calculated readiness results.
+
+        </div>
+
+    </section>
+
+
+    <!-- FORMULAS -->
+
+    <div class="rules-grid rules-grid-equal">
+
+        <section class="rules-panel">
+
+            <div class="rules-panel-heading">
+
+                <h2>Weighted readiness</h2>
+
+                <p>
+                    Calculates preparation for a
+                    succeeding subject.
+                </p>
+
+            </div>
+
+            <div class="rules-formula">
+
+                <span>R =</span>
+
+                <div class="rules-fraction">
+
+                    <span>
+                        Sum of (Rating &times; Weight)
+                    </span>
+
+                    <span>
+                        Sum of weights
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="rules-formula-description">
+
+                <p>
+                    Each required competency contributes
+                    according to its defined relevance.
+                </p>
+
+                <p>
+                    Displayed scores are rounded to
+                    two decimal places.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section class="rules-panel">
+
+            <div class="rules-panel-heading">
+
+                <h2>Review priority</h2>
+
+                <p>
+                    Determines the order of competency
+                    review recommendations.
+                </p>
+
+            </div>
+
+            <div class="rules-formula">
+
+                <span>
+                    P = ({{ maximum_rating }} &minus; Rating)
+                    &times; Weight
+                </span>
+
+            </div>
+
+            <div class="rules-formula-description">
+
+                <p>
+                    Lower ratings and higher relevance
+                    receive greater review priority.
+                </p>
+
+                <p>
+                    Only identified competency gaps
+                    generate recommendations.
+                </p>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- CALCULATION SIMULATOR -->
+
+    <section class="rules-panel"
+             id="calculation-simulator">
+
+        <div class="rules-panel-heading">
+
+            <div class="rules-heading-inline">
+
+                <div>
+
+                    <h2>Calculation simulator</h2>
+
+                    <p>
+                        Explore how sample ratings and
+                        relevance weights affect results.
+                    </p>
+
+                </div>
+
+                <span class="rules-pill rules-pill-neutral">
+                    Sample data only
+                </span>
+
+            </div>
+
+        </div>
+
+        <form method="post"
+              action="{% url 'accounts:analysis_rules' %}#calculation-simulator">
+
+            {% csrf_token %}
+
+            {% if form.errors %}
+
+            <div class="rules-error" role="alert">
+
+                Please select valid ratings and
+                relevance weights.
+
+                {{ form.non_field_errors }}
+
+            </div>
+
+            {% endif %}
+
+            <div class="rules-table-wrap">
+
+                <table class="rules-table rules-input-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Competency</th>
+
+                            <th>Self-rating</th>
+
+                            <th>Relevance</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for row in simulator_rows %}
+
+                        <tr>
+
+                            <td>{{ row.name }}</td>
+
+                            <td>
+
+                                <label class="rules-sr-only"
+                                       for="{{ row.rating.id_for_label }}">
+
+                                    {{ row.name }} rating
+
+                                </label>
+
+                                {{ row.rating }}
+
+                                {{ row.rating.errors }}
+
+                            </td>
+
+                            <td>
+
+                                <label class="rules-sr-only"
+                                       for="{{ row.relevance.id_for_label }}">
+
+                                    {{ row.name }} relevance
+
+                                </label>
+
+                                {{ row.relevance }}
+
+                                {{ row.relevance.errors }}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="rules-actions">
+
+                <button type="submit"
+                        class="rules-button-primary">
+
+                    Calculate results
+
+                </button>
+
+                <a href="{% url 'accounts:analysis_rules' %}#calculation-simulator"
+                   class="rules-button-secondary">
+
+                    Reset
+
+                </a>
+
+            </div>
+
+        </form>
+
+
+        {% if simulation %}
+
+        <div class="rules-simulation-results"
+             aria-live="polite">
+
+            <h3>Simulation results</h3>
+
+            <div class="rules-simulation-metrics">
+
+                <div>
+
+                    <span>Readiness score</span>
+
+                    <strong>
+                        {{ simulation.score }} / 5
+                    </strong>
+
+                </div>
+
+                <div>
+
+                    <span>Readiness level</span>
+
+                    <strong>
+                        {{ simulation.level }}
+                    </strong>
+
+                </div>
+
+                <div>
+
+                    <span>Competency gaps</span>
+
+                    <strong>
+                        {{ simulation.gap_count }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <div class="rules-calculation-detail">
+
+                Weighted readiness:
+
+                <strong>
+
+                    {{ simulation.numerator }}
+                    &divide;
+                    {{ simulation.denominator }}
+                    =
+                    {{ simulation.score }}
+
+                </strong>
+
+            </div>
+
+            {% if simulation.priorities %}
+
+            <h3>Review priorities</h3>
+
+            <div class="rules-table-wrap">
+
+                <table class="rules-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Rank</th>
+
+                            <th>Competency</th>
+
+                            <th>Rating</th>
+
+                            <th>Relevance</th>
+
+                            <th>Priority score</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for item in simulation.priorities %}
+
+                        <tr>
+
+                            <td>
+                                {{ item.priority_rank }}
+                            </td>
+
+                            <td>
+                                {{ item.name }}
+                            </td>
+
+                            <td>
+                                {{ item.rating }}/5
+                            </td>
+
+                            <td>
+                                {{ item.relevance_label }}
+                            </td>
+
+                            <td>
+
+                                <strong class="rules-priority">
+                                    {{ item.priority_score }}
+                                </strong>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="rules-empty">
+
+                No review priorities were generated
+                from these sample ratings.
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+        <div class="rules-panel-note">
+
+            The simulator does not create assessments,
+            change calculation rules or modify student records.
+
+        </div>
+
+    </section>
+
+
+    <!-- SAFEGUARDS -->
+
+    <section class="rules-safeguards">
+
+        <div class="rules-shield">
+
+            <svg viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.7"
+                 aria-hidden="true">
+
+                <path d="M12 3l8 3v6c0 5-8 9-8 9s-8-4-8-9V6z"/>
+
+                <path d="m8 12 3 3 5-6"/>
+
+            </svg>
+
+        </div>
+
+        <div>
+
+            <h2>Decision-support safeguards</h2>
+
+            <p>{{ disclaimer }}</p>
+
+            <p>
+
+                These developer-defined rules are not
+                scientifically validated measurements
+                of academic ability.
+
+            </p>
+
+            <p>
+
+                Stored assessment results retain their
+                generated values and rule version.
+                Viewing them does not automatically
+                recalculate historical results.
+
+            </p>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}
