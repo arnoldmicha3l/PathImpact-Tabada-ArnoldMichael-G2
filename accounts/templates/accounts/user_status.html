@@ -1,0 +1,261 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}
+
+    {% if desired_status %}
+        Activate account
+    {% else %}
+        Deactivate account
+    {% endif %}
+
+{% endblock %}
+
+
+{% block extra_head %}
+
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+
+<link rel="stylesheet"
+      href="{% static 'accounts/user_management.css' %}?v=07f">
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="am-workspace am-form-workspace um-workspace">
+
+    <a class="am-back"
+       href="{% url 'accounts:user_detail' account.pk %}">
+
+        ← Back to account details
+
+    </a>
+
+
+    <header class="am-heading">
+
+        <div>
+
+            <h1>
+
+                {% if desired_status %}
+
+                    Activate account
+
+                {% else %}
+
+                    Deactivate account
+
+                {% endif %}
+
+            </h1>
+
+            <p>
+                Review the account before changing system access.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <section class="am-panel">
+
+        <div class="am-panel-heading">
+
+            <h2>Confirm access change</h2>
+
+        </div>
+
+
+        <form method="post" class="am-form">
+
+            {% csrf_token %}
+
+
+            {% if already_set %}
+
+            <div class="um-notice">
+
+                <strong>No change required</strong>
+
+                <p>
+
+                    This account already has
+                    the requested access status.
+
+                </p>
+
+            </div>
+
+            {% elif desired_status %}
+
+            <div class="um-notice um-notice-success">
+
+                <strong>Restore student access?</strong>
+
+                <p>
+
+                    This student will be permitted to sign in
+                    and access PathImpact again using
+                    their existing account credentials.
+
+                </p>
+
+            </div>
+
+            {% else %}
+
+            <div class="um-notice um-notice-warning">
+
+                <strong>Restrict student access?</strong>
+
+                <p>
+
+                    This student will no longer be permitted
+                    to access authenticated PathImpact pages.
+
+                    Existing profile information and assessment
+                    records will be preserved.
+
+                </p>
+
+            </div>
+
+            {% endif %}
+
+
+            <div class="um-confirm-identity">
+
+                <span class="um-avatar um-avatar-large"
+                      aria-hidden="true">
+
+                    {{ account.username|slice:":1"|upper }}
+
+                </span>
+
+                <div class="um-identity-text">
+
+                    <strong>
+
+                        {{ account.get_full_name|default:account.username }}
+
+                    </strong>
+
+                    <span class="um-secondary">
+
+                        @{{ account.username }}
+
+                    </span>
+
+                    <span class="um-secondary">
+
+                        {{ account.email|default:"No email provided" }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <dl class="um-information-grid um-confirm-grid">
+
+                <div class="um-information-field">
+
+                    <dt>Current status</dt>
+
+                    <dd>
+
+                        {% if account.is_active %}
+
+                            Active
+
+                        {% else %}
+
+                            Inactive
+
+                        {% endif %}
+
+                    </dd>
+
+                </div>
+
+                <div class="um-information-field">
+
+                    <dt>Requested status</dt>
+
+                    <dd>
+
+                        {% if desired_status %}
+
+                            Active
+
+                        {% else %}
+
+                            Inactive
+
+                        {% endif %}
+
+                    </dd>
+
+                </div>
+
+            </dl>
+
+
+            <div class="am-form-footer">
+
+                <a class="am-button"
+                   href="{% url 'accounts:user_detail' account.pk %}">
+
+                    {% if already_set %}
+
+                        Back to account
+
+                    {% else %}
+
+                        Cancel
+
+                    {% endif %}
+
+                </a>
+
+
+                {% if not already_set %}
+
+                    {% if desired_status %}
+
+                    <button type="submit"
+                            class="am-button am-primary">
+
+                        Activate account
+
+                    </button>
+
+                    {% else %}
+
+                    <button type="submit"
+                            class="am-button um-danger-button">
+
+                        Deactivate account
+
+                    </button>
+
+                    {% endif %}
+
+                {% endif %}
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}
