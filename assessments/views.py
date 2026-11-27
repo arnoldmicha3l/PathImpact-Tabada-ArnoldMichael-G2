@@ -1,3 +1,5 @@
+from .result_services import generate_assessment_results
+
 from functools import wraps
 
 from django.contrib import messages
@@ -229,6 +231,11 @@ def edit(request, pk=None):
 
         AssessmentResponse.objects.bulk_create(
             form.responses(attempt)
+        )
+
+        generate_assessment_results(
+            user=request.user,
+            assessment_id=attempt.pk,
         )
 
         messages.success(

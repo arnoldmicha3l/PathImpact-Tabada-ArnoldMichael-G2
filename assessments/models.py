@@ -546,3 +546,305 @@ class CompetencyImpact(models.Model):
             f"{self.subject_competency} -> "
             f"{self.prerequisite.successor.code}"
         )
+
+
+class ReadinessResult(models.Model):
+
+    class Level(models.TextChoices):
+
+        NEEDS_STRENGTHENING = (
+            "Needs strengthening",
+            "Needs strengthening",
+        )
+
+        DEVELOPING = (
+            "Developing readiness",
+            "Developing readiness",
+        )
+
+        HIGHER = (
+            "Higher readiness",
+            "Higher readiness",
+        )
+
+        INSUFFICIENT = (
+            "Insufficient information",
+            "Insufficient information",
+        )
+
+    assessment = models.ForeignKey(
+        AssessmentSession,
+        on_delete=models.CASCADE,
+        related_name="readiness_results",
+    )
+
+    succeeding_subject = models.ForeignKey(
+        Subject,
+        on_delete=models.PROTECT,
+        related_name="readiness_results",
+    )
+
+    readiness_level = models.CharField(
+        max_length=30,
+        choices=Level.choices,
+    )
+
+    readiness_score = models.DecimalField(
+        max_digits=3,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+
+    is_affected = models.BooleanField(
+        default=False,
+    )
+
+    required_competency_count = (
+        models.PositiveIntegerField(default=0)
+    )
+
+    missing_count = models.PositiveIntegerField(
+        default=0,
+    )
+
+    gap_count = models.PositiveIntegerField(
+        default=0,
+    )
+
+    rule_version = models.CharField(
+        max_length=20,
+    )
+
+    subject_code_snapshot = models.CharField(
+        max_length=20,
+    )
+
+    subject_name_snapshot = models.CharField(
+        max_length=120,
+    )
+
+    generated_at = models.DateTimeField(
+        default=timezone.now,
+    )
+
+    class Meta:
+
+        ordering = [
+            "-is_affected",
+            "subject_code_snapshot",
+            "pk",
+        ]
+
+        constraints = [
+
+            models.UniqueConstraint(
+                fields=[
+                    "assessment",
+                    "succeeding_subject",
+                ],
+                name="unique_assessment_readiness",
+            ),
+
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        readiness_score__isnull=True
+                    )
+                    | models.Q(
+                        readiness_score__range=(1, 5)
+                    )
+                ),
+                name="valid_readiness_score",
+            ),
+
+            models.CheckConstraint(
+                condition=models.Q(
+                    readiness_level__in=[
+                        "Needs strengthening",
+                        "Developing readiness",
+                        "Higher readiness",
+                        "Insufficient information",
+                    ]
+                ),
+                name="valid_readiness_level",
+            ),
+
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        readiness_level="Insufficient information",
+                        readiness_score__isnull=True,
+                    )
+                    | (
+                        ~models.Q(
+                            readiness_level="Insufficient information"
+                        )
+                        & models.Q(
+                            readiness_score__isnull=False
+                        )
+                    )
+                ),
+                name="consistent_readiness_score",
+            ),
+
+            models.CheckConstraint(
+                condition=models.Q(
+                    missing_count__lte=models.F(
+                        "required_competency_count"
+                    )
+                ),
+                name="valid_readiness_missing_count",
+            ),
+
+            models.CheckConstraint(
+                condition=models.Q(
+                    gap_count__lte=(
+                        models.F("required_competency_count")
+                        - models.F("missing_count")
+                    )
+                ),
+                name="valid_readiness_gap_count",
+            ),
+
+            models.CheckConstraint(
+                condition=(
+                    models.Q(
+                        is_affected=True,
+                        gap_count__gt=0,
+                    )
+                    | models.Q(
+                        is_affected=False,
+                        gap_count=0,
+                    )
+                ),
+                name="consistent_affected_subject",
+            ),
+
+        ]
+
+    def __str__(self):
+
+        return (
+            f"Assessment #{self.assessment_id} | "
+            f"{self.subject_code_snapshot} | "
+            f"{self.readiness_level}"
+        )
+
+
+class ReviewRecommendation(models.Model):
+
+    response = models.ForeignKey(
+        AssessmentResponse,
+        on_delete=models.CASCADE,
+        related_name="review_recommendations",
+    )
+
+    succeeding_subject = models.ForeignKey(
+        Subject,
+        on_delete=models.PROTECT,
+        related_name="review_recommendations",
+    )
+
+    priority_rank = models.PositiveIntegerField()
+
+    priority_score = models.PositiveSmallIntegerField()
+
+    relevance = models.PositiveSmallIntegerField(
+        choices=CompetencyImpact.Relevance.choices,
+    )
+
+    self_rating_snapshot = (
+        models.PositiveSmallIntegerField()
+    )
+
+    competency_code_snapshot = models.CharField(
+        max_length=24,
+    )
+
+    competency_name_snapshot = models.CharField(
+        max_length=120,
+    )
+
+    subject_code_snapshot = models.CharField(
+        max_length=20,
+    )
+
+    subject_name_snapshot = models.CharField(
+        max_length=120,
+    )
+
+    recommendation_text = models.TextField()
+
+    rule_version = models.CharField(
+        max_length=20,
+    )
+
+    generated_at = models.DateTimeField(
+        default=timezone.now,
+    )
+
+    class Meta:
+
+        ordering = [
+            "priority_rank",
+            "pk",
+        ]
+
+        constraints = [
+
+            models.UniqueConstraint(
+                fields=[
+                    "response",
+                    "succeeding_subject",
+                ],
+                name="unique_response_recommendation",
+            ),
+
+            models.CheckConstraint(
+                condition=models.Q(
+                    priority_rank__gte=1
+                ),
+                name="valid_review_priority_rank",
+            ),
+
+            models.CheckConstraint(
+                condition=models.Q(
+                    priority_score__range=(2, 12)
+                ),
+                name="valid_review_priority_score",
+            ),
+
+            models.CheckConstraint(
+                condition=models.Q(
+                    relevance__range=(1, 3)
+                ),
+                name="valid_review_relevance",
+            ),
+
+            models.CheckConstraint(
+                condition=models.Q(
+                    self_rating_snapshot__range=(1, 3)
+                ),
+                name="valid_review_gap_rating",
+            ),
+
+            models.CheckConstraint(
+                condition=models.Q(
+                    priority_score=(
+                        (5 - models.F("self_rating_snapshot"))
+                        * models.F("relevance")
+                    )
+                ),
+                name="consistent_review_priority",
+            ),
+
+        ]
+
+    def __str__(self):
+
+        return (
+            f"Priority {self.priority_rank} | "
+            f"{self.competency_code_snapshot} | "
+            f"{self.subject_code_snapshot}"
+        )
