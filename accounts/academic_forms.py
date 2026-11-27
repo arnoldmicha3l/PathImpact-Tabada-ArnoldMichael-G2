@@ -1,13 +1,16 @@
 
 from django import forms
 
-from assessments.models import AcademicProgram, Subject
+from assessments.models import (
+    AcademicProgram,
+    Subject,
+    SubjectPrerequisite,
+)
 
 
 class ProgramForm(forms.ModelForm):
 
     class Meta:
-
         model = AcademicProgram
 
         fields = [
@@ -66,7 +69,6 @@ class ProgramForm(forms.ModelForm):
 class SubjectForm(forms.ModelForm):
 
     class Meta:
-
         model = Subject
 
         fields = [
@@ -92,10 +94,16 @@ class SubjectForm(forms.ModelForm):
                 attrs={"placeholder": "e.g. CSIT226"}
             ),
             "name": forms.TextInput(
-                attrs={"placeholder": "e.g. Information Management 1"}
+                attrs={
+                    "placeholder":
+                    "e.g. Information Management 1"
+                }
             ),
             "units": forms.NumberInput(
-                attrs={"min": 0, "placeholder": "e.g. 3"}
+                attrs={
+                    "min": 0,
+                    "placeholder": "e.g. 3",
+                }
             ),
         }
 
@@ -112,6 +120,28 @@ class SubjectForm(forms.ModelForm):
         program = cleaned.get("program")
         code = cleaned.get("code")
 
+        if (
+            program
+            and self.instance.pk
+            and program.pk != self.instance.program_id
+        ):
+
+            has_prerequisites = (
+                SubjectPrerequisite.objects.filter(
+                    prerequisite_id=self.instance.pk
+                ).exists()
+                or SubjectPrerequisite.objects.filter(
+                    successor_id=self.instance.pk
+                ).exists()
+            )
+
+            if has_prerequisites:
+                self.add_error(
+                    "program",
+                    "Remove prerequisite relationships "
+                    "before changing the program.",
+                )
+
         if program and code:
 
             duplicate = Subject.objects.filter(
@@ -122,7 +152,8 @@ class SubjectForm(forms.ModelForm):
             if duplicate.exists():
                 self.add_error(
                     "code",
-                    "This subject code already exists in the program."
+                    "This subject code already exists "
+                    "in the program.",
                 )
 
         return cleaned

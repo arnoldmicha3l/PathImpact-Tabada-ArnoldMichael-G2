@@ -4,8 +4,15 @@ from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Q
 from django.db.models.deletion import ProtectedError
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_http_methods, require_safe
+from django.shortcuts import (
+    get_object_or_404,
+    redirect,
+    render,
+)
+from django.views.decorators.http import (
+    require_http_methods,
+    require_safe,
+)
 
 from assessments.models import AcademicProgram, Subject
 
@@ -86,13 +93,19 @@ def subjects(request):
         )
 
     if program.isdecimal() and len(program) <= 10:
-        records = records.filter(program_id=int(program))
+        records = records.filter(
+            program_id=int(program)
+        )
 
     if year in ["1", "2", "3", "4"]:
-        records = records.filter(year_level=int(year))
+        records = records.filter(
+            year_level=int(year)
+        )
 
     if semester in ["1", "2", "3"]:
-        records = records.filter(semester=int(semester))
+        records = records.filter(
+            semester=int(semester)
+        )
 
     page = paginate(request, records)
 
@@ -121,7 +134,14 @@ def subjects(request):
     )
 
 
-def save_record(request, pk, model, form_class, label, list_url):
+def save_record(
+    request,
+    pk,
+    model,
+    form_class,
+    label,
+    list_url,
+):
 
     instance = (
         get_object_or_404(model, pk=pk)
@@ -163,7 +183,7 @@ def save_record(request, pk, model, form_class, label, list_url):
             form.add_error(
                 None,
                 "The record could not be saved. "
-                "Check for duplicate or conflicting information."
+                "Check for duplicate or conflicting information.",
             )
 
         else:
@@ -210,7 +230,17 @@ def program_edit(request, pk=None):
 
 @administrator_only
 @require_http_methods(["GET", "POST"])
+@transaction.atomic
 def subject_edit(request, pk=None):
+
+    if request.method == "POST":
+
+        list(
+            AcademicProgram.objects
+            .select_for_update()
+            .order_by("pk")
+            .values_list("pk", flat=True)
+        )
 
     return save_record(
         request,
@@ -222,7 +252,13 @@ def subject_edit(request, pk=None):
     )
 
 
-def delete_record(request, pk, model, label, list_url):
+def delete_record(
+    request,
+    pk,
+    model,
+    label,
+    list_url,
+):
 
     record = get_object_or_404(model, pk=pk)
 

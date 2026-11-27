@@ -5,6 +5,7 @@ from django.urls import path, reverse_lazy
 from . import views
 from . import administrator_views
 from . import academic_views
+from . import prerequisite_views
 
 
 app_name = "accounts"
@@ -100,6 +101,30 @@ urlpatterns = [
         "administrator/subjects/<int:pk>/delete/",
         academic_views.subject_delete,
         name="subject_delete",
+    ),
+
+    path(
+        "administrator/prerequisites/",
+        prerequisite_views.prerequisites,
+        name="prerequisites",
+    ),
+
+    path(
+        "administrator/prerequisites/new/",
+        prerequisite_views.prerequisite_edit,
+        name="prerequisite_create",
+    ),
+
+    path(
+        "administrator/prerequisites/<int:pk>/edit/",
+        prerequisite_views.prerequisite_edit,
+        name="prerequisite_edit",
+    ),
+
+    path(
+        "administrator/prerequisites/<int:pk>/delete/",
+        prerequisite_views.prerequisite_delete,
+        name="prerequisite_delete",
     ),
 
     path(

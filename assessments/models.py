@@ -1,5 +1,6 @@
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
@@ -198,3 +199,133 @@ class AssessmentResponse(models.Model):
             ),
 
         ]
+
+
+class SubjectPrerequisite(models.Model):
+
+    prerequisite = models.ForeignKey(
+        Subject,
+        on_delete=models.PROTECT,
+        related_name="successor_links",
+    )
+
+    successor = models.ForeignKey(
+        Subject,
+        on_delete=models.PROTECT,
+        related_name="prerequisite_links",
+    )
+
+    class Meta:
+
+        ordering = [
+            "successor__code",
+            "prerequisite__code",
+            "pk",
+        ]
+
+        constraints = [
+
+            models.UniqueConstraint(
+                fields=["prerequisite", "successor"],
+                name="unique_subject_prerequisite",
+            ),
+
+            models.CheckConstraint(
+                condition=~models.Q(
+                    prerequisite=models.F("successor")
+                ),
+                name="no_self_prerequisite",
+            ),
+
+        ]
+
+    def clean(self):
+
+        super().clean()
+
+        if not self.prerequisite_id or not self.successor_id:
+            return
+
+        if self.prerequisite_id == self.successor_id:
+
+            raise ValidationError(
+                "A subject cannot require itself."
+            )
+
+        subjects = dict(
+            Subject.objects.filter(
+                pk__in=[
+                    self.prerequisite_id,
+                    self.successor_id,
+                ]
+            ).values_list("pk", "program_id")
+        )
+
+        if (
+            self.prerequisite_id not in subjects
+            or self.successor_id not in subjects
+        ):
+
+            raise ValidationError(
+                "Select valid prerequisite and successor subjects."
+            )
+
+        if (
+            subjects[self.prerequisite_id]
+            != subjects[self.successor_id]
+        ):
+
+            raise ValidationError(
+                "Both subjects must belong to the same program."
+            )
+
+        edges = SubjectPrerequisite.objects.exclude(
+            pk=self.pk
+        )
+
+        if edges.filter(
+            prerequisite_id=self.prerequisite_id,
+            successor_id=self.successor_id,
+        ).exists():
+
+            raise ValidationError(
+                "This prerequisite relationship already exists."
+            )
+
+        graph = {}
+
+        for source, target in edges.values_list(
+            "prerequisite_id",
+            "successor_id",
+        ):
+
+            graph.setdefault(source, []).append(target)
+
+        pending = [self.successor_id]
+        visited = set()
+
+        while pending:
+
+            node = pending.pop()
+
+            if node == self.prerequisite_id:
+
+                raise ValidationError(
+                    "This relationship would create a "
+                    "circular prerequisite chain."
+                )
+
+            if node not in visited:
+
+                visited.add(node)
+
+                pending.extend(
+                    graph.get(node, [])
+                )
+
+    def __str__(self):
+
+        return (
+            f"{self.prerequisite.code} → "
+            f"{self.successor.code}"
+        )
