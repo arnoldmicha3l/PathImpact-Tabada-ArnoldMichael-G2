@@ -1,0 +1,284 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Administrator dashboard{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet"
+      href="{% static 'accounts/administrator.css' %}?v=07a">
+{% endblock %}
+
+{% block content %}
+
+<div class="ad-workspace">
+
+    <header class="ad-heading">
+        <h1>Dashboard</h1>
+        <p>Academic and system overview</p>
+    </header>
+
+    <section class="ad-kpi-grid"
+             aria-label="System statistics">
+
+        <article class="ad-card ad-kpi">
+            <div class="ad-kpi-heading">
+                <span>Registered students</span>
+                <div class="ad-icon">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M2 21v-2a7 7 0 0 1 14 0v2"/>
+                        <path d="M17 3a4 4 0 0 1 0 8M22 21v-2a7 7 0 0 0-4-6"/>
+                    </svg>
+                </div>
+            </div>
+            <strong>{{ student_count }}</strong>
+            <small>Registered student accounts</small>
+        </article>
+
+        <article class="ad-card ad-kpi">
+            <div class="ad-kpi-heading">
+                <span>Academic subjects</span>
+                <div class="ad-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 5v16M12 5C9 2 5 2 2 4v15c4-2 7-1 10 2 3-3 6-4 10-2V4c-3-2-7-2-10 1z"/>
+                    </svg>
+                </div>
+            </div>
+            <strong>{{ subject_count }}</strong>
+            <small>Subjects in the reference catalog</small>
+        </article>
+
+        <article class="ad-card ad-kpi">
+            <div class="ad-kpi-heading">
+                <span>Competencies</span>
+                <div class="ad-icon">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="4" y="3" width="16"
+                              height="18" rx="2"/>
+                        <path d="m7 9 2 2 3-4M14 9h3M7 16h10"/>
+                    </svg>
+                </div>
+            </div>
+            <strong>{{ competency_count }}</strong>
+            <small>Defined academic competencies</small>
+        </article>
+
+        <article class="ad-card ad-kpi">
+            <div class="ad-kpi-heading">
+                <span>Completed assessments</span>
+                <div class="ad-icon">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="m8 12 3 3 5-6"/>
+                    </svg>
+                </div>
+            </div>
+            <strong>{{ completed_count }}</strong>
+            <small>Completed student self-assessments</small>
+        </article>
+
+    </section>
+
+    <div class="ad-overview-grid">
+
+        <section class="ad-card ad-panel">
+
+            <header class="ad-panel-header">
+                <div>
+                    <h2>Assessment activity</h2>
+                    <p>Completed assessments · Last 7 days</p>
+                </div>
+
+                <span class="ad-period">7 days</span>
+            </header>
+
+            <div class="ad-panel-body">
+
+                <div class="ad-chart-summary">
+                    <strong>{{ weekly_total }}</strong>
+                    <span>Completed this period</span>
+                </div>
+
+                <div class="ad-chart">
+
+                    {% for day in activity %}
+
+                        <div class="ad-chart-column">
+
+                            <span class="ad-chart-value">
+                                {{ day.count }}
+                            </span>
+
+                            <div class="ad-bar-track">
+
+                                <div class="ad-bar"
+                                     style="height: {{ day.height }}%;"
+                                     title="{{ day.date|date:'M j' }}: {{ day.count }} completed">
+                                </div>
+
+                            </div>
+
+                            <span class="ad-chart-label">
+                                {{ day.label }}
+                            </span>
+
+                            <small>
+                                {{ day.date|date:"M j" }}
+                            </small>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="ad-card ad-panel">
+
+            <header class="ad-panel-header">
+                <div>
+                    <h2>Academic data overview</h2>
+                    <p>Reference catalog coverage</p>
+                </div>
+            </header>
+
+            <div class="ad-panel-body">
+
+                <div class="ad-coverage">
+
+                    <div class="ad-coverage-heading">
+                        <span>Competency coverage</span>
+                        <strong>{{ coverage }}%</strong>
+                    </div>
+
+                    <div class="ad-progress"
+                         role="progressbar"
+                         aria-label="Subject competency coverage"
+                         aria-valuemin="0"
+                         aria-valuemax="100"
+                         aria-valuenow="{{ coverage }}">
+
+                        <div style="width: {{ coverage }}%;"></div>
+
+                    </div>
+
+                    <small>
+                        {{ mapped_subject_count }} of
+                        {{ subject_count }} subjects mapped
+                    </small>
+
+                </div>
+
+                <dl class="ad-data-list">
+
+                    <div>
+                        <dt>Academic programs</dt>
+                        <dd>{{ program_count }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>Competency mappings</dt>
+                        <dd>{{ mapping_count }}</dd>
+                    </div>
+
+                    <div>
+                        <dt>Subjects without mappings</dt>
+                        <dd>{{ unmapped_subject_count }}</dd>
+                    </div>
+
+                </dl>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <section class="ad-card ad-panel ad-activity-panel">
+
+        <header class="ad-panel-header">
+            <div>
+                <h2>Recent activity</h2>
+                <p>Latest registrations and assessment completions</p>
+            </div>
+        </header>
+
+        <div class="ad-table-wrap">
+
+            <table class="ad-table">
+
+                <thead>
+                    <tr>
+                        <th scope="col">Activity</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Date and time</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for event in recent_activity %}
+
+                        <tr>
+
+                            <td>
+                                <div class="ad-event">
+
+                                    <div class="ad-event-icon">
+
+                                        <svg viewBox="0 0 24 24">
+
+                                            {% if event.category == "Account" %}
+
+                                                <circle cx="9" cy="7" r="4"/>
+                                                <path d="M2 21v-2a7 7 0 0 1 14 0v2M19 8v6M16 11h6"/>
+
+                                            {% else %}
+
+                                                <circle cx="12" cy="12" r="9"/>
+                                                <path d="m8 12 3 3 5-6"/>
+
+                                            {% endif %}
+
+                                        </svg>
+
+                                    </div>
+
+                                    <strong>{{ event.title }}</strong>
+
+                                </div>
+                            </td>
+
+                            <td>{{ event.category }}</td>
+
+                            <td>
+                                {{ event.timestamp|date:"M j, Y · g:i A" }}
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="3" class="ad-empty">
+                                No recent activity recorded.
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

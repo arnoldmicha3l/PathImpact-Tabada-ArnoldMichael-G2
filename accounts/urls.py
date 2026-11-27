@@ -1,12 +1,22 @@
+
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
 from . import views
+from . import administrator_views
+
 
 app_name = "accounts"
 
+
 urlpatterns = [
-    path("register/", views.register, name="register"),
+
+    path(
+        "register/",
+        views.register,
+        name="register",
+    ),
+
     path(
         "login/",
         auth_views.LoginView.as_view(
@@ -16,6 +26,7 @@ urlpatterns = [
         ),
         name="login",
     ),
+
     path(
         "logout/",
         auth_views.LogoutView.as_view(
@@ -23,17 +34,35 @@ urlpatterns = [
         ),
         name="logout",
     ),
-    path("dashboard/", views.dashboard, name="dashboard"),
+
+    path(
+        "dashboard/",
+        views.dashboard,
+        name="dashboard",
+    ),
+
     path(
         "dashboard/student/",
         views.student_dashboard,
         name="student_dashboard",
     ),
+
     path(
         "dashboard/administrator/",
-        views.administrator_dashboard,
+        administrator_views.dashboard,
         name="administrator_dashboard",
     ),
-    path("profile/", views.profile, name="profile"),
-    path("profile/edit/", views.edit_profile, name="edit_profile"),
+
+    path(
+        "profile/",
+        views.profile,
+        name="profile",
+    ),
+
+    path(
+        "profile/edit/",
+        views.edit_profile,
+        name="edit_profile",
+    ),
+
 ]
