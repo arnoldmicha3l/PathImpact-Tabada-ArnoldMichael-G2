@@ -216,6 +216,32 @@
 
             </a>
 
+            <a href="{% url 'accounts:assessment_reports' %}"
+               {% if current == "assessment_reports" or current == "assessment_reports_export" %}
+                   class="mm-active"
+               {% endif %}
+               {% if current == "assessment_reports" %}
+                   aria-current="page"
+               {% endif %}>
+
+                <svg class="mm-icon"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.7"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+
+                    <path d="M3 3v18h18"/>
+                    <path d="M7 16v-4M12 16V8M17 16V5"/>
+
+                </svg>
+
+                <span>Assessment Reports</span>
+
+            </a>
+
         </div>
 
 

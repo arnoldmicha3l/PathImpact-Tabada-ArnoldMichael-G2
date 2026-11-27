@@ -9,6 +9,7 @@ from . import prerequisite_views
 from . import competency_views
 from . import mapping_views
 from . import user_management_views
+from . import report_views
 
 
 app_name = "accounts"
@@ -210,6 +211,20 @@ urlpatterns = [
         "administrator/users/<int:pk>/status/<str:action>/",
         user_management_views.user_status,
         name="user_status",
+    ),
+
+    # Assessment reports
+
+    path(
+        "administrator/reports/",
+        report_views.assessment_reports,
+        name="assessment_reports",
+    ),
+
+    path(
+        "administrator/reports/export/",
+        report_views.assessment_reports_export,
+        name="assessment_reports_export",
     ),
 
     # Account management
