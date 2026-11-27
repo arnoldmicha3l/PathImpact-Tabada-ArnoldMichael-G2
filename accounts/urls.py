@@ -7,6 +7,7 @@ from . import administrator_views
 from . import academic_views
 from . import prerequisite_views
 from . import competency_views
+from . import mapping_views
 
 
 app_name = "accounts"
@@ -162,6 +163,32 @@ urlpatterns = [
         "administrator/competencies/<int:pk>/delete/",
         competency_views.competency_delete,
         name="competency_delete",
+    ),
+
+    # Competency mappings
+
+    path(
+        "administrator/mappings/",
+        mapping_views.mappings,
+        name="mappings",
+    ),
+
+    path(
+        "administrator/mappings/new/",
+        mapping_views.mapping_edit,
+        name="mapping_create",
+    ),
+
+    path(
+        "administrator/mappings/<int:pk>/edit/",
+        mapping_views.mapping_edit,
+        name="mapping_edit",
+    ),
+
+    path(
+        "administrator/mappings/<int:pk>/delete/",
+        mapping_views.mapping_delete,
+        name="mapping_delete",
     ),
 
     # Account management
