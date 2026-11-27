@@ -6,139 +6,211 @@ from django.shortcuts import redirect, render
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_http_methods
 
+from assessments.models import AssessmentSession
+
 from .forms import ProfileForm, RegistrationForm
 from .models import CustomUser
 
 
+# Dashboard statistics
+
 def _student_context(user):
-    from django.utils import timezone
-    from opportunities.models import Application, Opportunity
-    apps = user.applications.select_related("opportunity")
+    assessments = AssessmentSession.objects.filter(
+        user=user
+    ).order_by("-started_at", "-pk")
+
+    recent_assessments = list(assessments[:5])
+
     return {
-        "stats": [
-            ("📨", "Applications", apps.count()),
-            ("⏳", "Pending", apps.filter(status=Application.Status.PENDING).count()),
-            ("✅", "Approved", apps.filter(status=Application.Status.APPROVED).count()),
-            ("🌱", "Open to join", Opportunity.objects.filter(status="open", deadline__gte=timezone.localdate()).count()),
-        ],
-        "recent_applications": apps[:4],
+        "assessment_count": assessments.count(),
+        "completed_count": assessments.filter(
+            completed_at__isnull=False
+        ).count(),
+        "latest_assessment": (
+            recent_assessments[0]
+            if recent_assessments
+            else None
+        ),
+        "recent_assessments": recent_assessments,
     }
 
 
-def _admin_context(user):
-    from opportunities.models import Application, Opportunity
-    return {
-        "stats": [
-            ("📣", "Opportunities", Opportunity.objects.count()),
-            ("🟢", "Open", Opportunity.objects.filter(status="open").count()),
-            ("📥", "Awaiting review", Application.objects.filter(status=Application.Status.PENDING).count()),
-            ("🙌", "Volunteers approved", Application.objects.filter(status=Application.Status.APPROVED).count()),
-        ],
-        "pending_reviews": Application.objects.filter(status=Application.Status.PENDING).select_related("opportunity", "applicant")[:5],
-    }
-
+# Home
 
 def home(request):
     if request.user.is_authenticated:
         return redirect("accounts:dashboard")
+
     return redirect("accounts:login")
 
+
+# Registration
 
 @sensitive_post_parameters("password1", "password2")
 @require_http_methods(["GET", "POST"])
 def register(request):
+
     if request.user.is_authenticated:
         return redirect("accounts:dashboard")
 
     form = RegistrationForm(
         request.POST if request.method == "POST" else None
     )
+
     if request.method == "POST" and form.is_valid():
+
         username = form.cleaned_data["username"]
         email = form.cleaned_data["email"]
 
         try:
             with transaction.atomic():
                 form.save()
+
         except IntegrityError as exc:
+
             if getattr(exc.__cause__, "sqlstate", None) != "23505":
                 raise
 
             username_taken = CustomUser.objects.filter(
                 username__iexact=username
             ).exists()
-            email_taken = CustomUser.objects.filter(email__iexact=email).exists()
+
+            email_taken = CustomUser.objects.filter(
+                email__iexact=email
+            ).exists()
 
             if username_taken:
-                form.add_error("username", "This username is already taken.")
+                form.add_error(
+                    "username",
+                    "This username is already taken."
+                )
+
             if email_taken:
-                form.add_error("email", "This email is already registered.")
+                form.add_error(
+                    "email",
+                    "This email is already registered."
+                )
+
             if not username_taken and not email_taken:
                 raise
+
         else:
-            messages.success(request, "Your PathImpact account was created. You can now sign in.")
+            messages.success(
+                request,
+                "Your PathImpact account was created. "
+                "You can now sign in."
+            )
+
             return redirect("accounts:login")
 
-    return render(request, "accounts/register.html", {"form": form})
+    return render(
+        request,
+        "accounts/register.html",
+        {"form": form}
+    )
 
+
+# Role-based dashboard routing
 
 @login_required(login_url="accounts:login")
+@require_http_methods(["GET"])
 def dashboard(request):
+
     if request.user.role == CustomUser.Role.STUDENT:
         return redirect("accounts:student_dashboard")
+
     if request.user.role == CustomUser.Role.ADMINISTRATOR:
         return redirect("accounts:administrator_dashboard")
+
     raise PermissionDenied
 
 
+# Student dashboard
+
 @login_required(login_url="accounts:login")
+@require_http_methods(["GET"])
 def student_dashboard(request):
+
     if request.user.role != CustomUser.Role.STUDENT:
         raise PermissionDenied
+
+    context = {
+        "page_title": "Dashboard",
+        "description": (
+            "Manage your competency self-assessments."
+        ),
+        "role_view": "student",
+        **_student_context(request.user),
+    }
+
     return render(
         request,
         "accounts/dashboard.html",
-        {
-            "page_title": "Student dashboard",
-            "description": "Discover causes, apply to volunteer and track your impact.",
-            "role_view": "student",
-            **_student_context(request.user),
-        },
+        context
     )
 
 
+# Administrator dashboard
+
 @login_required(login_url="accounts:login")
+@require_http_methods(["GET"])
 def administrator_dashboard(request):
+
     if request.user.role != CustomUser.Role.ADMINISTRATOR:
         raise PermissionDenied
+
+    context = {
+        "page_title": "Administrator dashboard",
+        "description": (
+            "Access your administrator account "
+            "and manage your personal profile."
+        ),
+        "role_view": "administrator",
+    }
+
     return render(
         request,
         "accounts/dashboard.html",
-        {
-            "page_title": "Administrator dashboard",
-            "description": "Publish opportunities and review volunteer applications.",
-            "role_view": "administrator",
-            **_admin_context(request.user),
-        },
+        context
     )
 
 
-@login_required(login_url="accounts:login")
-def profile(request):
-    return render(request, "accounts/profile.html")
+# User profile
 
+@login_required(login_url="accounts:login")
+@require_http_methods(["GET"])
+def profile(request):
+
+    return render(
+        request,
+        "accounts/profile.html"
+    )
+
+
+# Edit profile
 
 @login_required(login_url="accounts:login")
 @require_http_methods(["GET", "POST"])
 def edit_profile(request):
+
     form = ProfileForm(
         request.POST if request.method == "POST" else None,
         instance=request.user,
     )
+
     if request.method == "POST" and form.is_valid():
+
         form.save()
-        messages.success(request, "Your profile was updated.")
+
+        messages.success(
+            request,
+            "Your profile was updated."
+        )
+
         return redirect("accounts:profile")
 
-    return render(request, "accounts/edit_profile.html", {"form": form})
-
+    return render(
+        request,
+        "accounts/edit_profile.html",
+        {"form": form}
+    )

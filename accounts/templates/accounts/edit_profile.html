@@ -1,21 +1,156 @@
+
 {% extends "accounts/base.html" %}
 {% load static %}
+
 {% block title %}Edit profile{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet"
+      href="{% static 'accounts/profile.css' %}?v=phase06">
+{% endblock %}
+
 {% block content %}
-<link rel="stylesheet" href="{% static 'accounts/contour-fold.css' %}">
-<div class="cf">
-<section class="cf-panel" aria-labelledby="edit-heading">
-  <p class="cf-label">Account settings</p>
-  <h1 id="edit-heading">Edit profile</h1>
-  <p>Keep your account details up to date.</p>
-  <form method="post">
-    {% csrf_token %}
-    {% include "accounts/contour-fields.html" %}
-    <div class="actions">
-      <button class="btn" type="submit">Save changes</button>
-      <a class="btn btn-light" href="{% url 'accounts:profile' %}">Cancel</a>
-    </div>
-  </form>
-</section>
+
+<div class="pp-workspace">
+
+    <header class="pp-heading">
+        <h1>Edit profile</h1>
+    </header>
+
+    <section class="pp-card">
+
+        <div class="pp-identity">
+
+            <div class="pp-avatar" aria-hidden="true">
+                {{ user.username|first|upper }}
+            </div>
+
+            <div class="pp-identity-info">
+
+                <h2>
+                    {{ user.get_full_name|default:user.username }}
+                </h2>
+
+                <span class="pp-role">
+                    {{ user.get_role_display }}
+                </span>
+
+            </div>
+
+        </div>
+
+        <form method="post"
+              class="pp-form">
+
+            {% csrf_token %}
+
+            {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+                {{ hidden.errors }}
+            {% endfor %}
+
+            <div class="pp-section">
+
+                <h2>Personal information</h2>
+
+                {% if form.non_field_errors %}
+
+                    <div class="pp-error-summary"
+                         role="alert">
+
+                        {{ form.non_field_errors }}
+
+                    </div>
+
+                {% endif %}
+
+                <div class="pp-form-grid">
+
+                    {% for field in form.visible_fields %}
+
+                        <div class="pp-field {% if field.name == 'email' %}pp-field-full{% endif %}">
+
+                            <label for="{{ field.id_for_label }}">
+
+                                {{ field.label }}
+
+                                {% if field.field.required %}
+                                    <span class="pp-required">*</span>
+                                {% endif %}
+
+                            </label>
+
+                            {{ field }}
+
+                            {% if field.help_text %}
+
+                                <div class="pp-help">
+                                    {{ field.help_text }}
+                                </div>
+
+                            {% endif %}
+
+                            {% for error in field.errors %}
+
+                                <p class="pp-error"
+                                   role="alert">
+
+                                    {{ error }}
+
+                                </p>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <div class="pp-section">
+
+                <h2>Account information</h2>
+
+                <dl class="pp-details">
+
+                    <div class="pp-detail">
+                        <dt>Username</dt>
+                        <dd>{{ user.username }}</dd>
+                    </div>
+
+                    <div class="pp-detail">
+                        <dt>Account role</dt>
+                        <dd>{{ user.get_role_display }}</dd>
+                    </div>
+
+                </dl>
+
+            </div>
+
+            <div class="pp-form-footer">
+
+                <a class="pp-button pp-secondary"
+                   href="{% url 'accounts:profile' %}">
+
+                    Cancel
+
+                </a>
+
+                <button class="pp-button pp-primary"
+                        type="submit">
+
+                    Save changes
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
 </div>
+
 {% endblock %}

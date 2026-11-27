@@ -1,6 +1,129 @@
+
 {% extends "accounts/base.html" %}
-{% block title %}Delete attempt · PathImpact{% endblock %}
+{% load static %}
+
+{% block title %}Delete assessment{% endblock %}
+
 {% block content %}
-<header class="intro"><p class="eyebrow">PRIVATE SELF-ASSESSMENT</p><h1>Delete attempt {{ attempt.pk }}?</h1><p>This permanently removes the attempt and all its ratings.</p></header>
-<section class="card narrow"><form method="post">{% csrf_token %}<div class="form-actions"><button type="submit">Confirm deletion</button><a class="btn quiet" href="{% url 'assessment_detail' attempt.pk %}">Cancel</a></div></form></section>
+
+<link rel="stylesheet"
+      href="{% static 'accounts/assessments.css' %}?v=20261127-07">
+
+<div class="pa-workspace">
+
+    <nav class="pa-breadcrumb" aria-label="Breadcrumb">
+
+        <a href="{% url 'accounts:dashboard' %}">
+            Dashboard
+        </a>
+
+        <span aria-hidden="true">/</span>
+
+        <a href="{% url 'assessment_index' %}">
+            Self-assessments
+        </a>
+
+        <span aria-hidden="true">/</span>
+
+        <a href="{% url 'assessment_detail' attempt.pk %}">
+            Attempt #{{ attempt.pk }}
+        </a>
+
+        <span aria-hidden="true">/</span>
+
+        <span aria-current="page">Delete</span>
+
+    </nav>
+
+    <header class="pa-heading">
+
+        <div>
+
+            <h1>Delete assessment</h1>
+
+            <p>
+                Review the selected assessment
+                before confirming deletion.
+            </p>
+
+        </div>
+
+    </header>
+
+    <section class="pa-panel pa-confirmation"
+             aria-labelledby="confirmation-title">
+
+        <header class="pa-panel-header">
+
+            <h2 id="confirmation-title">
+                Confirm deletion
+            </h2>
+
+        </header>
+
+        <div class="pa-panel-body">
+
+            <div class="pa-delete-warning">
+
+                <strong>This action cannot be undone.</strong>
+
+                <p style="margin: 6px 0 0; font-size: 13px;">
+
+                    Deleting this assessment will permanently
+                    remove the selected assessment and its
+                    saved competency responses.
+
+                </p>
+
+            </div>
+
+            <div class="pa-delete-record">
+
+                <strong>
+                    Assessment #{{ attempt.pk }}
+                </strong>
+
+                <span>
+
+                    Created
+                    {{ attempt.started_at|date:"M j, Y" }}
+                    at
+                    {{ attempt.started_at|date:"g:i A" }}
+
+                </span>
+
+            </div>
+
+            <form method="post"
+                  action="{% url 'assessment_delete' attempt.pk %}">
+
+                {% csrf_token %}
+
+                <div class="pa-actions"
+                     style="justify-content: flex-end;">
+
+                    <a class="pa-button pa-button-secondary"
+                       href="{% url 'assessment_detail' attempt.pk %}">
+
+                        Cancel
+
+                    </a>
+
+                    <button type="submit"
+                            class="pa-button pa-button-danger">
+
+                        Delete permanently
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+</div>
+
 {% endblock %}

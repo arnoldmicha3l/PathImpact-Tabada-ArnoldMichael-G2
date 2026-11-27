@@ -1,0 +1,259 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Prerequisites{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+
+{% endblock %}
+
+{% block content %}
+
+<div class="am-workspace">
+
+    <header class="am-heading">
+
+        <div>
+
+            <h1>Prerequisites</h1>
+
+            <p>Manage academic subject dependencies.</p>
+
+        </div>
+
+        <a class="am-button am-primary"
+           href="{% url 'accounts:prerequisite_create' %}">
+
+            + Add prerequisite
+
+        </a>
+
+    </header>
+
+    <section class="am-panel">
+
+        <div class="am-panel-heading">
+
+            <h2>Prerequisite relationships</h2>
+
+            <span>
+                {{ total }} relationship{{ total|pluralize }}
+                ·
+                {{ successor_count }} successor subject{{ successor_count|pluralize }}
+            </span>
+
+        </div>
+
+        <form method="get" class="am-toolbar">
+
+            <div class="am-search">
+
+                <input type="search"
+                       name="q"
+                       value="{{ query }}"
+                       placeholder="Search subjects..."
+                       aria-label="Search subjects">
+
+            </div>
+
+            <select name="program"
+                    aria-label="Filter by program">
+
+                <option value="">All programs</option>
+
+                {% for program in programs %}
+
+                    <option value="{{ program.pk }}"
+                        {% if selected_program == program.pk|stringformat:'s' %}
+                            selected
+                        {% endif %}>
+
+                        {{ program.code }}
+
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+            <button class="am-button am-primary"
+                    type="submit">
+
+                Filter
+
+            </button>
+
+            <a class="am-button"
+               href="{% url 'accounts:prerequisites' %}">
+
+                Reset
+
+            </a>
+
+        </form>
+
+        <div class="am-table-wrap">
+
+            <table class="am-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th scope="col">Program</th>
+
+                        <th scope="col">Prerequisite</th>
+
+                        <th scope="col">Successor subject</th>
+
+                        <th scope="col">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for item in page %}
+
+                        <tr>
+
+                            <td>
+
+                                {{ item.prerequisite.program.code }}
+
+                            </td>
+
+                            <td>
+
+                                <strong class="am-code">
+
+                                    {{ item.prerequisite.code }}
+
+                                </strong>
+
+                                <div>
+
+                                    {{ item.prerequisite.name }}
+
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                <strong class="am-code">
+
+                                    {{ item.successor.code }}
+
+                                </strong>
+
+                                <div>
+
+                                    {{ item.successor.name }}
+
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                <div class="am-actions">
+
+                                    <a class="am-button am-small"
+                                       href="{% url 'accounts:prerequisite_edit' item.pk %}">
+
+                                        Edit
+
+                                    </a>
+
+                                    <a class="am-button am-small am-danger"
+                                       href="{% url 'accounts:prerequisite_delete' item.pk %}">
+
+                                        Delete
+
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td colspan="4">
+
+                                <div class="am-empty">
+
+                                    <strong>
+                                        No relationships found
+                                    </strong>
+
+                                    <p>
+                                        Add a prerequisite or
+                                        adjust your filters.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <footer class="am-pagination">
+
+            <span>
+
+                Page {{ page.number }} of
+                {{ page.paginator.num_pages }}
+
+            </span>
+
+            <div class="am-actions">
+
+                {% if page.has_previous %}
+
+                    <a class="am-button am-small"
+                       href="{% querystring page=page.previous_page_number %}">
+
+                        Previous
+
+                    </a>
+
+                {% endif %}
+
+                {% if page.has_next %}
+
+                    <a class="am-button am-small"
+                       href="{% querystring page=page.next_page_number %}">
+
+                        Next
+
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </footer>
+
+    </section>
+
+</div>
+
+{% endblock %}

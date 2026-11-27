@@ -1,0 +1,653 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Competency Mapping{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+
+<style>
+
+.mp-workspace .mp-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.mp-workspace .mp-summary-card {
+    min-width: 0;
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    border-radius: 10px;
+}
+
+.mp-workspace .mp-summary-label {
+    display: block;
+    color: #71717a;
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.mp-workspace .mp-summary-value {
+    color: #18181b;
+    font-size: 30px;
+    font-weight: 650;
+    letter-spacing: -1px;
+    line-height: 1.2;
+}
+
+.mp-workspace .mp-summary-note {
+    color: #71717a;
+    font-size: 11px;
+    margin: 8px 0 0;
+}
+
+.mp-workspace .mp-code {
+    display: block;
+    color: #800020;
+    font-size: 11px;
+    font-weight: 650;
+    margin-bottom: 4px;
+}
+
+.mp-workspace .mp-name {
+    color: #27272a;
+    font-size: 13px;
+    font-weight: 550;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.mp-workspace .mp-secondary {
+    color: #71717a;
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 4px;
+}
+
+.mp-workspace .mp-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.mp-workspace .mp-status-active {
+    color: #356044;
+    background: #edf5ef;
+}
+
+.mp-workspace .mp-status-protected {
+    color: #52525b;
+    background: #f4f4f5;
+}
+
+.mp-workspace .mp-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.mp-workspace .mp-table {
+    min-width: 820px;
+}
+
+.mp-workspace .mp-unmapped-panel {
+    margin-top: 24px;
+}
+
+.mp-workspace .mp-unmapped-list {
+    padding: 0 20px;
+}
+
+.mp-workspace .mp-unmapped-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 15px 0;
+    border-bottom: 1px solid #eeeeef;
+}
+
+.mp-workspace .mp-unmapped-row:last-child {
+    border-bottom: 0;
+}
+
+.mp-workspace .mp-note {
+    color: #71717a;
+    font-size: 12px;
+    line-height: 1.7;
+    margin-top: 16px;
+}
+
+.mp-workspace .mp-panel-note {
+    color: #71717a;
+    font-size: 12px;
+    padding: 0 20px 16px;
+}
+
+.mp-workspace .mp-unmapped-empty {
+    padding: 24px 0;
+    color: #71717a;
+    font-size: 13px;
+}
+
+@media (max-width: 850px) {
+
+    .mp-workspace .mp-summary-grid {
+        gap: 12px;
+    }
+
+    .mp-workspace .mp-summary-card {
+        padding: 16px;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .mp-workspace .mp-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mp-workspace .mp-summary-value {
+        font-size: 26px;
+    }
+
+    .mp-workspace .mp-unmapped-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="am-workspace mp-workspace">
+
+    <header class="am-heading">
+
+        <div>
+
+            <h1>Competency Mapping</h1>
+
+            <p>
+                Manage relationships between academic
+                subjects and competency definitions.
+            </p>
+
+        </div>
+
+        <a class="am-button am-primary"
+           href="{% url 'accounts:mapping_create' %}">
+
+            + Add mapping
+
+        </a>
+
+    </header>
+
+
+    <section class="mp-summary-grid"
+             aria-label="Mapping coverage summary">
+
+        <article class="mp-summary-card">
+
+            <span class="mp-summary-label">
+                Total mappings
+            </span>
+
+            <div class="mp-summary-value">
+                {{ total_count }}
+            </div>
+
+            <p class="mp-summary-note">
+                Subject-to-competency relationships
+            </p>
+
+        </article>
+
+        <article class="mp-summary-card">
+
+            <span class="mp-summary-label">
+                Mapped subjects
+            </span>
+
+            <div class="mp-summary-value">
+                {{ mapped_count }}
+            </div>
+
+            <p class="mp-summary-note">
+                Subjects with assigned competencies
+            </p>
+
+        </article>
+
+        <article class="mp-summary-card">
+
+            <span class="mp-summary-label">
+                Unmapped subjects
+            </span>
+
+            <div class="mp-summary-value">
+                {{ unmapped_count }}
+            </div>
+
+            <p class="mp-summary-note">
+                Subjects awaiting competency assignment
+            </p>
+
+        </article>
+
+    </section>
+
+
+    <section class="am-panel">
+
+        <div class="am-panel-heading">
+
+            <h2>Mapping directory</h2>
+
+            <span>
+                {{ filtered_count }}
+                mapping{{ filtered_count|pluralize }}
+            </span>
+
+        </div>
+
+
+        <form method="get" class="am-toolbar">
+
+            <div class="am-search">
+
+                <input type="search"
+                       name="q"
+                       value="{{ query }}"
+                       placeholder="Search mappings..."
+                       aria-label="Search mappings">
+
+            </div>
+
+            <select name="program"
+                    aria-label="Filter by program">
+
+                <option value="">All programs</option>
+
+                {% for program in programs %}
+
+                <option value="{{ program.pk }}"
+                        {% if selected_program == program.pk|stringformat:"s" %}
+                            selected
+                        {% endif %}>
+
+                    {{ program.code }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <select name="subject"
+                    aria-label="Filter by subject">
+
+                <option value="">All subjects</option>
+
+                {% for subject in subjects %}
+
+                <option value="{{ subject.pk }}"
+                        {% if selected_subject == subject.pk|stringformat:"s" %}
+                            selected
+                        {% endif %}>
+
+                    {{ subject.program.code }} |
+                    {{ subject.code }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <select name="status"
+                    aria-label="Filter by protection status">
+
+                <option value="">All statuses</option>
+
+                <option value="editable"
+                        {% if selected_status == "editable" %}
+                            selected
+                        {% endif %}>
+
+                    Editable
+
+                </option>
+
+                <option value="protected"
+                        {% if selected_status == "protected" %}
+                            selected
+                        {% endif %}>
+
+                    Protected
+
+                </option>
+
+            </select>
+
+            <button type="submit"
+                    class="am-button am-primary">
+
+                Filter
+
+            </button>
+
+            <a class="am-button"
+               href="{% url 'accounts:mappings' %}">
+
+                Reset
+
+            </a>
+
+        </form>
+
+
+        <div class="am-table-wrap">
+
+            <table class="am-table mp-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th scope="col">Program</th>
+                        <th scope="col">Subject</th>
+                        <th scope="col">Competency</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for item in page %}
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                {{ item.subject.program.code }}
+                            </strong>
+
+                        </td>
+
+                        <td>
+
+                            <span class="mp-code">
+                                {{ item.subject.code }}
+                            </span>
+
+                            <div class="mp-name">
+                                {{ item.subject.name }}
+                            </div>
+
+                        </td>
+
+                        <td>
+
+                            <span class="mp-code">
+                                {{ item.competency.code }}
+                            </span>
+
+                            <div class="mp-name">
+                                {{ item.competency.name }}
+                            </div>
+
+                        </td>
+
+                        <td>
+
+                            {% if item.is_protected %}
+
+                            <span class="mp-status mp-status-protected">
+
+                                <span class="mp-status-dot"></span>
+
+                                Protected
+
+                            </span>
+
+                            <div class="mp-secondary">
+                                Used in assessments
+                            </div>
+
+                            {% else %}
+
+                            <span class="mp-status mp-status-active">
+
+                                <span class="mp-status-dot"></span>
+
+                                Editable
+
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <div class="am-actions">
+
+                                {% if item.is_protected %}
+
+                                <a class="am-button am-small"
+                                   href="{% url 'accounts:mapping_edit' item.pk %}">
+
+                                    View
+
+                                </a>
+
+                                {% else %}
+
+                                <a class="am-button am-small"
+                                   href="{% url 'accounts:mapping_edit' item.pk %}">
+
+                                    Edit
+
+                                </a>
+
+                                <a class="am-button am-small am-danger"
+                                   href="{% url 'accounts:mapping_delete' item.pk %}">
+
+                                    Remove
+
+                                </a>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="5">
+
+                            <div class="am-empty">
+
+                                <strong>
+                                    No competency mappings found
+                                </strong>
+
+                                <p>
+                                    Add a mapping or adjust
+                                    your search filters.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <footer class="am-pagination">
+
+            <span>
+
+                Page {{ page.number }}
+                of {{ page.paginator.num_pages }}
+
+            </span>
+
+            <div class="am-actions">
+
+                {% if page.has_previous %}
+
+                <a class="am-button am-small"
+                   href="{% querystring page=page.previous_page_number %}">
+
+                    Previous
+
+                </a>
+
+                {% endif %}
+
+                {% if page.has_next %}
+
+                <a class="am-button am-small"
+                   href="{% querystring page=page.next_page_number %}">
+
+                    Next
+
+                </a>
+
+                {% endif %}
+
+            </div>
+
+        </footer>
+
+    </section>
+
+
+    <section class="am-panel mp-unmapped-panel">
+
+        <div class="am-panel-heading">
+
+            <h2>Subjects awaiting mapping</h2>
+
+            <span>
+                {{ unmapped_filtered_count }}
+                subject{{ unmapped_filtered_count|pluralize }}
+            </span>
+
+        </div>
+
+        <div class="mp-panel-note">
+
+            Subjects without assigned competencies.
+            This list follows the selected program filter.
+
+        </div>
+
+        <div class="mp-unmapped-list">
+
+            {% for subject in unmapped_subjects %}
+
+            <div class="mp-unmapped-row">
+
+                <div>
+
+                    <span class="mp-code">
+
+                        {{ subject.program.code }} |
+                        {{ subject.code }}
+
+                    </span>
+
+                    <div class="mp-name">
+                        {{ subject.name }}
+                    </div>
+
+                </div>
+
+                <a class="am-button am-small"
+                   href="{% url 'accounts:mapping_create' %}?subject={{ subject.pk }}">
+
+                    + Assign competency
+
+                </a>
+
+            </div>
+
+            {% empty %}
+
+            <div class="mp-unmapped-empty">
+
+                No unmapped subjects found
+                within the selected program scope.
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% if unmapped_filtered_count > 10 %}
+
+        <p class="mp-panel-note">
+
+            Showing the first 10 unmapped subjects.
+            Select a program to narrow the list.
+
+        </p>
+
+        {% endif %}
+
+    </section>
+
+
+    <p class="mp-note">
+
+        Mapping coverage represents academic reference data,
+        not student mastery or official academic readiness.
+        Relationships referenced by assessment responses
+        are protected against modification and removal.
+
+    </p>
+
+</div>
+
+{% endblock %}

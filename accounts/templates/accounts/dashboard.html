@@ -1,33 +1,382 @@
 {% extends "accounts/base.html" %}
 {% load static %}
-{% block title %}{% if user.role == "student" %}Student dashboard{% else %}Administrator dashboard{% endif %}{% endblock %}
+
+{% block title %}Dashboard | PathImpact{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet"
+      href="{% static 'accounts/dashboard.css' %}?v=phase05">
+{% endblock %}
+
 {% block content %}
-<link rel="stylesheet" href="{% static 'accounts/contour-fold.css' %}">
-<div class="cf">
-<div class="cf-spread">
-  <section class="cf-panel" aria-labelledby="dashboard-heading">
-    <p class="cf-label">{{ user.get_role_display }}</p>
-    {% if user.role == "student" %}
-      <h1 id="dashboard-heading">Welcome, {{ user.first_name|default:user.username }}.</h1>
-      <p>View or update your account information as you prepare for future academic readiness activities.</p>
-    {% else %}
-      <h1 id="dashboard-heading">Administrator workspace</h1>
-      <p>You’re signed in as {{ user.username }}. You can view your own account information below.</p>
+
+<div class="pi-dashboard">
+
+    {% if role_view == "student" %}
+
+    <header class="db-heading">
+
+        <div>
+            <h1>Dashboard</h1>
+            <p>Manage your competency self-assessments.</p>
+        </div>
+
+        <a href="{% url 'assessment_create' %}"
+           class="db-button db-primary">
+
+            <svg viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.8"
+                 aria-hidden="true">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+
+            New assessment
+        </a>
+
+    </header>
+
+    <section class="db-stat-grid"
+             aria-label="Assessment statistics">
+
+        <article class="db-stat">
+
+            <div class="db-stat-top">
+
+                <span>Total assessments</span>
+
+                <div class="db-icon">
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.6"
+                         aria-hidden="true">
+                        <rect x="5" y="4"
+                              width="14" height="17" rx="2"/>
+                        <path d="M9 4V2h6v2M9 10h6M9 14h6"/>
+                    </svg>
+                </div>
+
+            </div>
+
+            <strong>{{ assessment_count }}</strong>
+
+            <small>Saved assessment records</small>
+
+        </article>
+
+        <article class="db-stat">
+
+            <div class="db-stat-top">
+
+                <span>Completed</span>
+
+                <div class="db-icon">
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.6"
+                         aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="m8 12 3 3 5-6"/>
+                    </svg>
+                </div>
+
+            </div>
+
+            <strong>{{ completed_count }}</strong>
+
+            <small>Completed self-assessments</small>
+
+        </article>
+
+        <article class="db-stat">
+
+            <div class="db-stat-top">
+
+                <span>Latest assessment</span>
+
+                <div class="db-icon">
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.6"
+                         aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M12 7v5l3 2"/>
+                    </svg>
+                </div>
+
+            </div>
+
+            {% if latest_assessment %}
+
+                <strong class="db-date">
+                    {{ latest_assessment.started_at|date:"M j, Y" }}
+                </strong>
+
+                <small>
+                    Assessment #{{ latest_assessment.pk }}
+                </small>
+
+            {% else %}
+
+                <strong class="db-date">—</strong>
+                <small>No assessment recorded</small>
+
+            {% endif %}
+
+        </article>
+
+    </section>
+
+    <a href="{% url 'assessment_create' %}"
+       class="db-assessment-action">
+
+        <div class="db-action-icon">
+
+            <svg viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.6"
+                 aria-hidden="true">
+
+                <rect x="5" y="4"
+                      width="14" height="17" rx="2"/>
+
+                <path d="M9 4V2h6v2"/>
+                <path d="m9 13 2 2 4-5"/>
+
+            </svg>
+
+        </div>
+
+        <div class="db-action-content">
+
+            <h2>Competency self-assessment</h2>
+
+            <p>Evaluate your current understanding of academic competencies.</p>
+
+        </div>
+
+        <svg class="db-arrow"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="1.8"
+             aria-hidden="true">
+
+            <path d="M5 12h14m-6-6 6 6-6 6"/>
+
+        </svg>
+
+    </a>
+
+    <section class="db-panel"
+             aria-labelledby="recent-assessments-title">
+
+        <header class="db-panel-header">
+
+            <h2 id="recent-assessments-title">
+                Recent assessments
+            </h2>
+
+            <a class="db-link"
+               href="{% url 'assessment_index' %}">
+                View all
+            </a>
+
+        </header>
+
+        <div class="db-table-wrap">
+
+            <table class="db-table">
+
+                <thead>
+                    <tr>
+                        <th scope="col">Assessment</th>
+                        <th scope="col">Date created</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for assessment in recent_assessments %}
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                Assessment #{{ assessment.pk }}
+                            </strong>
+
+                        </td>
+
+                        <td>
+                            {{ assessment.started_at|date:"M j, Y" }}
+                        </td>
+
+                        <td>
+
+                            {% if assessment.completed_at %}
+
+                                <span class="db-status db-completed">
+                                    Completed
+                                </span>
+
+                            {% else %}
+
+                                <span class="db-status db-pending">
+                                    Incomplete
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <div class="db-row-actions">
+
+                                <a href="{% url 'assessment_detail' assessment.pk %}"
+                                   class="db-small-button">
+                                    View
+                                </a>
+
+                                <a href="{% url 'assessment_edit' assessment.pk %}"
+                                   class="db-small-button">
+                                    Edit
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="4">
+
+                            <div class="db-empty">
+
+                                <svg viewBox="0 0 24 24"
+                                     fill="none"
+                                     stroke="currentColor"
+                                     stroke-width="1.5"
+                                     aria-hidden="true">
+
+                                    <rect x="5" y="4"
+                                          width="14" height="17" rx="2"/>
+
+                                    <path d="M9 4V2h6v2M9 10h6M9 14h6"/>
+
+                                </svg>
+
+                                <strong>No assessments yet</strong>
+
+                                <p>Your saved assessments will appear here.</p>
+
+                                <a class="db-link"
+                                   href="{% url 'assessment_create' %}">
+                                    Start an assessment
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+    <aside class="db-note">
+
+        <svg viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="1.6"
+             aria-hidden="true">
+
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 11v6M12 7h.01"/>
+
+        </svg>
+
+        <span>
+            Self-assessment ratings are not official academic grades.
+        </span>
+
+    </aside>
+
+    {% elif role_view == "administrator" %}
+
+    <header class="db-heading">
+
+        <div>
+            <h1>Administrator dashboard</h1>
+            <p>Manage your administrator account.</p>
+        </div>
+
+        <a href="{% url 'accounts:edit_profile' %}"
+           class="db-button db-primary">
+            Edit profile
+        </a>
+
+    </header>
+
+    <section class="db-panel">
+
+        <header class="db-panel-header">
+            <h2>Account overview</h2>
+        </header>
+
+        <dl class="db-account-grid">
+
+            <div>
+                <dt>Username</dt>
+                <dd>{{ request.user.username }}</dd>
+            </div>
+
+            <div>
+                <dt>Email address</dt>
+                <dd>{{ request.user.email|default:"Not set" }}</dd>
+            </div>
+
+            <div>
+                <dt>Account role</dt>
+                <dd>{{ request.user.get_role_display }}</dd>
+            </div>
+
+            <div>
+                <dt>Member since</dt>
+                <dd>{{ request.user.date_joined|date:"M j, Y" }}</dd>
+            </div>
+
+        </dl>
+
+    </section>
+
+    <aside class="db-note">
+        Student self-assessment records are private to their respective owners.
+    </aside>
+
     {% endif %}
-    <div class="actions">
-      <a class="btn" href="{% url 'accounts:profile' %}">View my profile</a>
-      {% if user.role != "student" and user.is_staff %}
-        <a class="btn btn-light" href="{% url 'admin:index' %}">Open Django administration</a>
-      {% endif %}
-    </div>
-  </section>
-  <aside class="cf-map">{% include "accounts/contour-fold.html" %}<p>{% if user.role == "student" %}Your academic pathway{% else %}Account reference desk{% endif %}</p></aside>
+
 </div>
-{% if user.role == "student" %}
-<section class="cf-panel cf-secondary">
-  <h2>What comes next</h2>
-  <p>Competency self-assessment and readiness analysis are planned for later phases.</p>
-</section>
-{% endif %}
-</div>
+
 {% endblock %}
