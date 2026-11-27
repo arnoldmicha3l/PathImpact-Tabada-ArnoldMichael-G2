@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -134,7 +135,15 @@
 
         </header>
 
-        {% include "accounts/_sidebar.html" %}
+        {% if user.role == "administrator" %}
+
+            {% include "accounts/_administrator_sidebar.html" %}
+
+        {% else %}
+
+            {% include "accounts/_sidebar.html" %}
+
+        {% endif %}
 
         <button type="button"
                 class="mm-backdrop"

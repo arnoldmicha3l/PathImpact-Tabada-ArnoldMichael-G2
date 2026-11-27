@@ -1,0 +1,292 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}{{ heading }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+{% endblock %}
+
+{% block content %}
+
+<div class="am-workspace">
+
+    <header class="am-heading">
+
+        <div>
+            <h1>{{ heading }}</h1>
+            <p>{{ description }}</p>
+        </div>
+
+        <a class="am-button am-primary"
+           href="{% url create_url %}">
+
+            <svg viewBox="0 0 24 24">
+                <path d="M12 5v14M5 12h14"/>
+            </svg>
+
+            Add {{ item_name }}
+
+        </a>
+
+    </header>
+
+    <section class="am-panel">
+
+        <div class="am-panel-heading">
+            <h2>All {{ module }}</h2>
+            <span>{{ total }} record{{ total|pluralize }}</span>
+        </div>
+
+        <form method="get" class="am-toolbar">
+
+            <div class="am-search">
+
+                <svg viewBox="0 0 24 24">
+                    <circle cx="10.5" cy="10.5" r="6.5"/>
+                    <path d="m16 16 5 5"/>
+                </svg>
+
+                <input type="search"
+                       name="q"
+                       value="{{ query }}"
+                       placeholder="Search {{ module }}..."
+                       aria-label="Search {{ module }}">
+
+            </div>
+
+            {% if module == "subjects" %}
+
+                <select name="program"
+                        aria-label="Filter by program">
+
+                    <option value="">All programs</option>
+
+                    {% for program in programs %}
+
+                        <option value="{{ program.pk }}"
+                            {% if selected_program == program.pk|stringformat:"s" %}
+                                selected
+                            {% endif %}>
+
+                            {{ program.code }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <select name="year"
+                        aria-label="Filter by year level">
+
+                    <option value="">All years</option>
+
+                    {% for value, label in years %}
+
+                        <option value="{{ value }}"
+                            {% if selected_year == value|stringformat:"s" %}
+                                selected
+                            {% endif %}>
+
+                            {{ label }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <select name="semester"
+                        aria-label="Filter by semester">
+
+                    <option value="">All semesters</option>
+
+                    {% for value, label in semesters %}
+
+                        <option value="{{ value }}"
+                            {% if selected_semester == value|stringformat:"s" %}
+                                selected
+                            {% endif %}>
+
+                            {{ label }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            {% endif %}
+
+            <button class="am-button am-primary" type="submit">
+                Filter
+            </button>
+
+            <a class="am-button"
+               href="{% url list_url %}">
+                Reset
+            </a>
+
+        </form>
+
+        <div class="am-table-wrap">
+
+            <table class="am-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th scope="col">Code</th>
+                        <th scope="col">Name</th>
+
+                        {% if module == "subjects" %}
+
+                            <th scope="col">Program</th>
+                            <th scope="col">Year</th>
+                            <th scope="col">Semester</th>
+                            <th scope="col">Units</th>
+
+                        {% else %}
+
+                            <th scope="col">Subjects</th>
+
+                        {% endif %}
+
+                        <th scope="col">Actions</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for item in page %}
+
+                        <tr>
+
+                            <td>
+                                <strong class="am-code">
+                                    {{ item.code }}
+                                </strong>
+                            </td>
+
+                            <td>{{ item.name }}</td>
+
+                            {% if module == "subjects" %}
+
+                                <td>{{ item.program.code }}</td>
+
+                                <td>
+                                    {{ item.year_level|default_if_none:"—" }}
+                                </td>
+
+                                <td>
+                                    {{ item.get_semester_display|default:"—" }}
+                                </td>
+
+                                <td>
+                                    {{ item.units|default_if_none:"—" }}
+                                </td>
+
+                            {% else %}
+
+                                <td>{{ item.subject_count }}</td>
+
+                            {% endif %}
+
+                            <td>
+
+                                <div class="am-actions">
+
+                                    <a class="am-button am-small"
+                                       href="{% url edit_url item.pk %}">
+                                        Edit
+                                    </a>
+
+                                    <a class="am-button am-small am-danger"
+                                       href="{% url delete_url item.pk %}">
+                                        Delete
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td colspan="{% if module == 'subjects' %}7{% else %}4{% endif %}">
+
+                                <div class="am-empty">
+
+                                    <svg viewBox="0 0 24 24">
+                                        <rect x="4" y="3"
+                                              width="16" height="18"
+                                              rx="2"/>
+                                        <path d="M8 8h8M8 12h8"/>
+                                    </svg>
+
+                                    <strong>No records found</strong>
+
+                                    <p>
+                                        Add a new {{ item_name }}
+                                        or adjust your search filters.
+                                    </p>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <footer class="am-pagination">
+
+            <span>
+                Page {{ page.number }} of
+                {{ page.paginator.num_pages }}
+            </span>
+
+            <div class="am-actions">
+
+                {% if page.has_previous %}
+
+                    <a class="am-button am-small"
+                       href="{% querystring page=page.previous_page_number %}">
+                        Previous
+                    </a>
+
+                {% endif %}
+
+                {% if page.has_next %}
+
+                    <a class="am-button am-small"
+                       href="{% querystring page=page.next_page_number %}">
+                        Next
+                    </a>
+
+                {% endif %}
+
+            </div>
+
+        </footer>
+
+    </section>
+
+</div>
+
+{% endblock %}

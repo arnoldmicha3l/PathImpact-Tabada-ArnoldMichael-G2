@@ -4,6 +4,7 @@ from django.urls import path, reverse_lazy
 
 from . import views
 from . import administrator_views
+from . import academic_views
 
 
 app_name = "accounts"
@@ -51,6 +52,54 @@ urlpatterns = [
         "dashboard/administrator/",
         administrator_views.dashboard,
         name="administrator_dashboard",
+    ),
+
+    path(
+        "administrator/programs/",
+        academic_views.programs,
+        name="programs",
+    ),
+
+    path(
+        "administrator/programs/new/",
+        academic_views.program_edit,
+        name="program_create",
+    ),
+
+    path(
+        "administrator/programs/<int:pk>/edit/",
+        academic_views.program_edit,
+        name="program_edit",
+    ),
+
+    path(
+        "administrator/programs/<int:pk>/delete/",
+        academic_views.program_delete,
+        name="program_delete",
+    ),
+
+    path(
+        "administrator/subjects/",
+        academic_views.subjects,
+        name="subjects",
+    ),
+
+    path(
+        "administrator/subjects/new/",
+        academic_views.subject_edit,
+        name="subject_create",
+    ),
+
+    path(
+        "administrator/subjects/<int:pk>/edit/",
+        academic_views.subject_edit,
+        name="subject_edit",
+    ),
+
+    path(
+        "administrator/subjects/<int:pk>/delete/",
+        academic_views.subject_delete,
+        name="subject_delete",
     ),
 
     path(
