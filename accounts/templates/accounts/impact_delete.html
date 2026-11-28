@@ -1,0 +1,113 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Remove Competency Impact | PathImpact{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+<link rel="stylesheet"
+      href="{% static 'accounts/competency_impacts.css' %}?v=07h1">
+{% endblock %}
+
+{% block content %}
+
+<div class="am-workspace ci-workspace">
+
+    <header class="ci-heading">
+
+        <div>
+
+            <h1>Remove competency impact</h1>
+
+            <p>Review the relationship before continuing.</p>
+
+        </div>
+
+        <a class="ci-button ci-button-secondary"
+           href="{% url 'accounts:impacts' %}">
+            Back to impacts
+        </a>
+
+    </header>
+
+    <section class="ci-panel ci-confirmation">
+
+        {% if is_protected %}
+
+        <div class="ci-warning">
+
+            This impact is protected because existing
+            student assessment responses reference
+            its competency mapping.
+
+        </div>
+
+        {% else %}
+
+        <div class="ci-warning">
+
+            Removing this impact will remove the defined
+            relevance relationship. It will not delete
+            the prerequisite, successor or competency.
+
+        </div>
+
+        {% endif %}
+
+        <dl>
+
+            <dt>Prerequisite subject</dt>
+
+            <dd>
+                {{ record.prerequisite.prerequisite }}
+            </dd>
+
+            <dt>Competency</dt>
+
+            <dd>
+                {{ record.subject_competency.competency }}
+            </dd>
+
+            <dt>Succeeding subject</dt>
+
+            <dd>
+                {{ record.prerequisite.successor }}
+            </dd>
+
+            <dt>Relevance</dt>
+
+            <dd>
+                {{ record.get_relevance_display }}
+            </dd>
+
+        </dl>
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="ci-actions">
+
+                <a class="ci-button ci-button-secondary"
+                   href="{% url 'accounts:impacts' %}">
+                    Cancel
+                </a>
+
+                {% if not is_protected %}
+
+                <button type="submit" class="ci-button">
+                    Remove impact
+                </button>
+
+                {% endif %}
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

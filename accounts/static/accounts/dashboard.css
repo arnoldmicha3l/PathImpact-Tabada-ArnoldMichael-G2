@@ -1,0 +1,502 @@
+﻿/* PathImpact - Dashboard
+   Phase 05
+*/
+
+.pi-dashboard {
+    --db-primary: #800020;
+    --db-primary-hover: #650019;
+    --db-soft: #f8eef0;
+    --db-text: #18181b;
+    --db-muted: #71717a;
+    --db-border: #e1e1e5;
+    --db-white: #ffffff;
+
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    color: var(--db-text);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.pi-dashboard *,
+.pi-dashboard *::before,
+.pi-dashboard *::after {
+    box-sizing: border-box;
+}
+
+.pi-dashboard h1,
+.pi-dashboard h2,
+.pi-dashboard p {
+    margin: 0;
+}
+
+.pi-dashboard a {
+    text-decoration: none;
+}
+
+.pi-dashboard svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Page heading */
+
+.pi-dashboard .db-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0;
+    padding: 0 0 2px;
+}
+
+.pi-dashboard .db-heading h1 {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.7px;
+    color: var(--db-text);
+}
+
+.pi-dashboard .db-heading p {
+    margin-top: 5px;
+    color: var(--db-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Buttons */
+
+.pi-dashboard .db-button {
+    min-height: 40px;
+    padding: 10px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color 150ms ease;
+}
+
+.pi-dashboard .db-button svg {
+    width: 17px;
+    height: 17px;
+}
+
+.pi-dashboard .db-primary {
+    background: var(--db-primary);
+    color: #ffffff;
+}
+
+.pi-dashboard .db-primary:hover {
+    background: var(--db-primary-hover);
+    color: #ffffff;
+}
+
+/* Statistics */
+
+.pi-dashboard .db-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.pi-dashboard .db-stat {
+    min-width: 0;
+    padding: 16px 18px;
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: 8px;
+}
+
+.pi-dashboard .db-stat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.pi-dashboard .db-stat-top > span {
+    color: #52525b;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.pi-dashboard .db-icon {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    background: var(--db-soft);
+    color: var(--db-primary);
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.pi-dashboard .db-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.pi-dashboard .db-stat > strong {
+    display: block;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--db-primary);
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.pi-dashboard .db-stat > .db-date {
+    font-size: 24px;
+    line-height: 1.44;
+    color: var(--db-text);
+}
+
+.pi-dashboard .db-stat > small {
+    display: block;
+    margin-top: 7px;
+    font-size: 12px;
+    color: var(--db-muted);
+}
+
+/* Assessment action */
+
+.pi-dashboard .db-assessment-action {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-height: 86px;
+    padding: 17px 20px;
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: 8px;
+    color: var(--db-text);
+    transition:
+        border-color 150ms ease,
+        background-color 150ms ease;
+}
+
+.pi-dashboard .db-assessment-action:hover {
+    border-color: #c58c9b;
+    background: #fffcfd;
+    color: var(--db-text);
+}
+
+.pi-dashboard .db-action-icon {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 7px;
+    background: var(--db-soft);
+    color: var(--db-primary);
+    flex-shrink: 0;
+}
+
+.pi-dashboard .db-action-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.pi-dashboard .db-action-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.pi-dashboard .db-action-content h2 {
+    color: var(--db-text);
+    font-size: 16px;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.pi-dashboard .db-action-content p {
+    color: var(--db-muted);
+    font-size: 12px;
+    margin-top: 4px;
+    line-height: 1.5;
+}
+
+.pi-dashboard .db-arrow {
+    color: var(--db-primary);
+}
+
+/* Recent assessments panel */
+
+.pi-dashboard .db-panel {
+    min-width: 0;
+    overflow: hidden;
+    background: var(--db-white);
+    border: 1px solid var(--db-border);
+    border-radius: 8px;
+}
+
+.pi-dashboard .db-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--db-border);
+}
+
+.pi-dashboard .db-panel-header h2 {
+    font-size: 16px;
+    font-weight: 650;
+    line-height: 1.4;
+    color: var(--db-text);
+}
+
+.pi-dashboard .db-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--db-primary);
+}
+
+.pi-dashboard .db-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Assessment table */
+
+.pi-dashboard .db-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.pi-dashboard .db-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 13px;
+    text-align: left;
+}
+
+.pi-dashboard .db-table thead {
+    background: #fafafa;
+}
+
+.pi-dashboard .db-table th {
+    padding: 11px 20px;
+    color: #71717a;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--db-border);
+}
+
+.pi-dashboard .db-table td {
+    padding: 13px 20px;
+    color: #3f3f46;
+    border-bottom: 1px solid #eeeeef;
+    vertical-align: middle;
+}
+
+.pi-dashboard .db-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.pi-dashboard .db-table td strong {
+    font-weight: 600;
+    color: var(--db-text);
+}
+
+.pi-dashboard .db-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pi-dashboard .db-small-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 5px 11px;
+    background: #ffffff;
+    border: 1px solid var(--db-border);
+    border-radius: 5px;
+    color: var(--db-primary);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pi-dashboard .db-small-button:hover {
+    background: var(--db-soft);
+    border-color: #e6bfc9;
+}
+
+/* Status */
+
+.pi-dashboard .db-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 9px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pi-dashboard .db-completed {
+    background: #edf6ef;
+    color: #27643b;
+}
+
+.pi-dashboard .db-pending {
+    background: #fff5e5;
+    color: #8a5b15;
+}
+
+/* Empty state */
+
+.pi-dashboard .db-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 14px 10px 18px;
+    text-align: center;
+}
+
+.pi-dashboard .db-empty svg {
+    width: 27px;
+    height: 27px;
+    color: #a1a1aa;
+    margin-bottom: 3px;
+}
+
+.pi-dashboard .db-empty strong {
+    font-size: 14px;
+}
+
+.pi-dashboard .db-empty p {
+    color: var(--db-muted);
+    font-size: 12px;
+}
+
+.pi-dashboard .db-empty .db-link {
+    margin-top: 3px;
+}
+
+/* Information note */
+
+.pi-dashboard .db-note {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 2px;
+    color: var(--db-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.pi-dashboard .db-note svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Administrator account */
+
+.pi-dashboard .db-account-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    padding: 22px;
+    margin: 0;
+}
+
+.pi-dashboard .db-account-grid dt {
+    color: var(--db-muted);
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.pi-dashboard .db-account-grid dd {
+    margin: 0;
+    color: var(--db-text);
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+/* Keyboard accessibility */
+
+.pi-dashboard a:focus-visible {
+    outline: 2px solid var(--db-primary);
+    outline-offset: 3px;
+}
+
+/* Responsive layout */
+
+@media (max-width: 1100px) {
+
+    .pi-dashboard .db-stat-grid {
+        gap: 12px;
+    }
+
+    .pi-dashboard .db-stat {
+        padding: 14px;
+    }
+
+    .pi-dashboard .db-stat > .db-date {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 760px) {
+
+    .pi-dashboard {
+        gap: 14px;
+    }
+
+    .pi-dashboard .db-heading {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .pi-dashboard .db-heading h1 {
+        font-size: 25px;
+    }
+
+    .pi-dashboard .db-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pi-dashboard .db-table {
+        min-width: 560px;
+    }
+
+    .pi-dashboard .db-account-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pi-dashboard .db-assessment-action {
+        padding: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .pi-dashboard * {
+        transition: none;
+    }
+}

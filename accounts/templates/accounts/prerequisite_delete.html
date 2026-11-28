@@ -1,0 +1,103 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Delete prerequisite{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+
+{% endblock %}
+
+{% block content %}
+
+<div class="am-workspace am-form-workspace">
+
+    <a class="am-back"
+       href="{% url 'accounts:prerequisites' %}">
+
+        ← Back to records
+
+    </a>
+
+    <header class="am-heading">
+
+        <div>
+
+            <h1>Delete prerequisite</h1>
+
+            <p>
+                Review the relationship before deleting it.
+            </p>
+
+        </div>
+
+    </header>
+
+    <section class="am-panel">
+
+        <div class="am-panel-heading">
+
+            <h2>Confirm deletion</h2>
+
+        </div>
+
+        <form method="post" class="am-form">
+
+            {% csrf_token %}
+
+            <div class="am-delete-warning">
+
+                <strong>
+                    Remove this prerequisite relationship?
+                </strong>
+
+                <p>
+                    This does not delete either subject.
+                </p>
+
+            </div>
+
+            <div class="am-record">
+
+                <small>Prerequisite</small>
+
+                <strong>
+                    {{ record.prerequisite }}
+                </strong>
+
+                <small>Successor</small>
+
+                <strong>
+                    {{ record.successor }}
+                </strong>
+
+            </div>
+
+            <div class="am-form-footer">
+
+                <a class="am-button"
+                   href="{% url 'accounts:prerequisites' %}">
+
+                    Cancel
+
+                </a>
+
+                <button class="am-button am-delete-button"
+                        type="submit">
+
+                    Delete prerequisite
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

@@ -1,26 +1,119 @@
+
 {% extends "accounts/base.html" %}
 {% load static %}
+
 {% block title %}My profile{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet"
+      href="{% static 'accounts/profile.css' %}?v=phase06">
+{% endblock %}
+
 {% block content %}
-<link rel="stylesheet" href="{% static 'accounts/contour-fold.css' %}">
-<div class="cf">
-{% url 'accounts:edit_profile' as edit_url %}
-{% if not edit_url %}{% url 'accounts:profile_edit' as edit_url %}{% endif %}
-<section class="cf-panel" aria-labelledby="profile-heading">
-  <p class="cf-label">{{ user.get_role_display }}</p>
-  <div class="cf-identity">
-    <span class="cf-initial" aria-hidden="true">{{ user.username|slice:":1"|upper }}</span>
-    <h1 id="profile-heading">My profile</h1>
-    {% if edit_url %}<a class="btn" href="{{ edit_url }}">Edit profile</a>{% endif %}
-  </div>
-  <dl class="cf-details">
-    <dt>Username</dt><dd>{{ user.username }}</dd>
-    <dt>First name</dt><dd>{{ user.first_name|default:"Not set" }}</dd>
-    <dt>Last name</dt><dd>{{ user.last_name|default:"Not set" }}</dd>
-    <dt>Email</dt><dd>{{ user.email|default:"Not set" }}</dd>
-    <dt>Member since</dt><dd>{{ user.date_joined|date:"F j, Y" }}</dd>
-  </dl>
-  <a href="{% url 'accounts:dashboard' %}">Back to dashboard</a>
-</section>
+
+<div class="pp-workspace">
+
+    <header class="pp-heading">
+        <h1>My profile</h1>
+    </header>
+
+    <section class="pp-card"
+             aria-labelledby="profile-name">
+
+        <div class="pp-identity">
+
+            <div class="pp-avatar" aria-hidden="true">
+                {{ user.username|first|upper }}
+            </div>
+
+            <div class="pp-identity-info">
+
+                <h2 id="profile-name">
+                    {{ user.get_full_name|default:user.username }}
+                </h2>
+
+                <span class="pp-role">
+                    {{ user.get_role_display }}
+                </span>
+
+            </div>
+
+            <a class="pp-button pp-primary"
+               href="{% url 'accounts:edit_profile' %}">
+
+                <svg width="16"
+                     height="16"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.7"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+
+                    <path d="m16 3 5 5-12 12-6 1 1-6z"/>
+                    <path d="m13 6 5 5"/>
+
+                </svg>
+
+                Edit profile
+
+            </a>
+
+        </div>
+
+        <div class="pp-section">
+
+            <h2>Personal information</h2>
+
+            <dl class="pp-details">
+
+                <div class="pp-detail">
+                    <dt>First name</dt>
+                    <dd>{{ user.first_name|default:"Not set" }}</dd>
+                </div>
+
+                <div class="pp-detail">
+                    <dt>Last name</dt>
+                    <dd>{{ user.last_name|default:"Not set" }}</dd>
+                </div>
+
+                <div class="pp-detail">
+                    <dt>Email address</dt>
+                    <dd>{{ user.email|default:"Not set" }}</dd>
+                </div>
+
+                <div class="pp-detail">
+                    <dt>Username</dt>
+                    <dd>{{ user.username }}</dd>
+                </div>
+
+            </dl>
+
+        </div>
+
+        <div class="pp-section">
+
+            <h2>Account information</h2>
+
+            <dl class="pp-details">
+
+                <div class="pp-detail">
+                    <dt>Account role</dt>
+                    <dd>{{ user.get_role_display }}</dd>
+                </div>
+
+                <div class="pp-detail">
+                    <dt>Member since</dt>
+                    <dd>{{ user.date_joined|date:"F j, Y" }}</dd>
+                </div>
+
+            </dl>
+
+        </div>
+
+    </section>
+
 </div>
+
 {% endblock %}

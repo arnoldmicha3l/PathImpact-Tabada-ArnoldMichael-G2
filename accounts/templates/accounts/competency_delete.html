@@ -1,0 +1,153 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Delete competency{% endblock %}
+
+
+{% block extra_head %}
+
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="am-workspace am-form-workspace">
+
+    <a class="am-back"
+       href="{% url 'accounts:competencies' %}">
+
+        ← Back to competencies
+
+    </a>
+
+
+    <header class="am-heading">
+
+        <div>
+
+            <h1>Delete competency</h1>
+
+            <p>
+                Review the competency before removing it.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <section class="am-panel">
+
+        <div class="am-panel-heading">
+
+            <h2>Confirm deletion</h2>
+
+        </div>
+
+
+        <form method="post" class="am-form">
+
+            {% csrf_token %}
+
+
+            {% if mapping_count %}
+
+            <div class="am-delete-warning">
+
+                <strong>
+                    This competency is protected.
+                </strong>
+
+                <p>
+
+                    It is linked to {{ mapping_count }}
+                    subject{{ mapping_count|pluralize }}
+                    and cannot be deleted.
+
+                </p>
+
+            </div>
+
+            {% else %}
+
+            <div class="am-delete-warning">
+
+                <strong>
+                    Permanently delete this competency?
+                </strong>
+
+                <p>
+                    This action cannot be undone.
+                    Only unused competencies can be removed.
+                </p>
+
+            </div>
+
+            {% endif %}
+
+
+            <div class="am-record">
+
+                <small>Competency code</small>
+
+                <strong>
+                    {{ record.code }}
+                </strong>
+
+                <small>Competency name</small>
+
+                <strong>
+                    {{ record.name }}
+                </strong>
+
+                <small>Linked subjects</small>
+
+                <strong>
+                    {{ mapping_count }}
+                </strong>
+
+            </div>
+
+
+            <div class="am-form-footer">
+
+                <a class="am-button"
+                   href="{% url 'accounts:competencies' %}">
+
+                    {% if mapping_count %}
+
+                        Back to competencies
+
+                    {% else %}
+
+                        Cancel
+
+                    {% endif %}
+
+                </a>
+
+
+                {% if not mapping_count %}
+
+                <button type="submit"
+                        class="am-button am-delete-button">
+
+                    Delete competency
+
+                </button>
+
+                {% endif %}
+
+            </div>
+
+        </form>
+
+    </section>
+
+</div>
+
+{% endblock %}

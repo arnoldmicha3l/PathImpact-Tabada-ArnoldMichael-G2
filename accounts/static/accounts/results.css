@@ -1,0 +1,378 @@
+
+/* PathImpact - Assessment History and Results */
+
+.pr-workspace {
+    --pr-primary: #800020;
+    --pr-text: #171717;
+    --pr-muted: #71717a;
+    --pr-border: #e4e4e7;
+    --pr-soft: #f7edef;
+
+    width: 100%;
+    max-width: 1440px;
+    min-width: 0;
+    padding: 0;
+    margin: 0 auto;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.pr-workspace .pa-heading {
+    margin-bottom: 20px;
+}
+
+.pr-workspace .pa-panel {
+    box-shadow: none;
+    margin-bottom: 18px;
+}
+
+.pr-workspace .pa-panel-header {
+    padding: 16px 20px;
+}
+
+.pr-workspace .pa-panel-header h2 {
+    font-size: 15px;
+    font-weight: 650;
+}
+
+.pr-count,
+.pr-muted {
+    color: var(--pr-muted);
+    font-size: 12px;
+}
+
+/* History */
+
+.pr-history-table {
+    min-width: 800px;
+}
+
+.pr-workspace .pr-history-table th {
+    padding: 12px 16px;
+    background: #f7f7f8;
+    white-space: nowrap;
+}
+
+.pr-workspace .pr-history-table td {
+    padding: 15px 16px;
+}
+
+.pr-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pr-workspace .pr-action {
+    color: var(--pr-primary);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.pr-workspace .pr-action:hover {
+    text-decoration: underline;
+}
+
+.pr-workspace .pr-delete {
+    color: #b42318;
+}
+
+.pr-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 9px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pr-completed {
+    color: #166534;
+    background: #edf7ef;
+}
+
+.pr-pending {
+    color: #92400e;
+    background: #fff6e5;
+}
+
+/* Empty state */
+
+.pr-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+    text-align: center;
+}
+
+.pr-empty svg {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 12px;
+    color: var(--pr-primary);
+}
+
+.pr-workspace .pr-empty h3 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 650;
+}
+
+.pr-workspace .pr-empty p {
+    margin: 0 0 16px;
+    color: var(--pr-muted);
+    font-size: 13px;
+}
+
+/* Results overview */
+
+.pr-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.pr-summary-card {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--pr-border);
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.pr-workspace .pr-summary-card h2 {
+    margin: 0 0 16px;
+    color: var(--pr-text);
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.4;
+}
+
+.pr-workspace .pr-summary-card p {
+    margin: 14px 0 0;
+    color: var(--pr-muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+/* Average rating ring */
+
+.pr-ring-wrap {
+    position: relative;
+    width: 138px;
+    height: 138px;
+    margin: 8px auto;
+}
+
+.pr-ring {
+    display: block;
+    width: 138px;
+    height: 138px;
+}
+
+.pr-ring-track {
+    fill: none;
+    stroke: #eee6e9;
+    stroke-width: 10;
+}
+
+.pr-ring-value {
+    fill: none;
+    stroke: var(--pr-primary);
+    stroke-width: 10;
+    stroke-linecap: round;
+}
+
+.pr-ring-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.pr-ring-label strong {
+    color: var(--pr-primary);
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.pr-ring-label span {
+    color: var(--pr-muted);
+    font-size: 12px;
+}
+
+.pr-no-rating {
+    display: grid;
+    place-items: center;
+    min-height: 138px;
+    font-size: 32px;
+    color: var(--pr-muted);
+}
+
+/* Assessment information */
+
+.pr-summary-list {
+    margin: 0;
+}
+
+.pr-summary-list > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    min-height: 43px;
+    border-bottom: 1px solid #efeff1;
+}
+
+.pr-summary-list > div:last-child {
+    border-bottom: 0;
+}
+
+.pr-summary-list dt {
+    color: var(--pr-muted);
+    font-size: 12px;
+}
+
+.pr-summary-list dd {
+    margin: 0;
+    color: var(--pr-text);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Rating distribution */
+
+.pr-distribution {
+    display: grid;
+    gap: 15px;
+    padding: 4px 0;
+}
+
+.pr-distribution-row {
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr) 24px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+}
+
+.pr-distribution-row strong {
+    text-align: right;
+}
+
+.pr-track {
+    width: 100%;
+    height: 7px;
+    border-radius: 20px;
+    background: #eee6e9;
+    overflow: hidden;
+}
+
+.pr-fill {
+    height: 100%;
+    max-width: 100%;
+    border-radius: inherit;
+    background: var(--pr-primary);
+}
+
+/* Competency breakdown */
+
+.pr-competency {
+    padding: 18px 20px;
+    border-bottom: 1px solid #efeff1;
+}
+
+.pr-competency:last-child {
+    border-bottom: 0;
+}
+
+.pr-competency-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.pr-workspace .pr-competency-heading h3 {
+    margin: 0 0 4px;
+    color: var(--pr-text);
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.pr-rating-value {
+    color: var(--pr-primary);
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.pr-workspace .pr-rating-label {
+    margin: 8px 0 0;
+    color: var(--pr-muted);
+    font-size: 12px;
+}
+
+/* Footer */
+
+.pr-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pr-workspace .pr-disclaimer {
+    margin: 0;
+    color: var(--pr-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* Responsive layout */
+
+@media (max-width: 1100px) {
+    .pr-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .pr-summary-card:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 650px) {
+    .pr-summary-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pr-summary-card:last-child {
+        grid-column: auto;
+    }
+
+    .pr-summary-card {
+        padding: 16px;
+    }
+
+    .pr-competency {
+        padding: 16px;
+    }
+
+    .pr-workspace .pa-heading {
+        align-items: flex-start;
+    }
+
+    .pr-bottom {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
