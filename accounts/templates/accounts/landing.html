@@ -1,0 +1,194 @@
+﻿
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PathImpact</title>
+
+    <link rel="stylesheet"
+          href="{% static 'accounts/landing.css' %}?v=final07">
+</head>
+<body class="pi-landing">
+
+    <header class="public-header">
+        <div class="public-container header-inner">
+
+            <a href="{% url 'home' %}" class="public-brand">
+                PathImpact
+            </a>
+
+            <nav class="public-nav" aria-label="Main navigation">
+                {% if user.is_authenticated %}
+                    <a class="nav-button" href="{% url 'accounts:dashboard' %}">
+                        Dashboard
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}">
+                        Sign in
+                    </a>
+
+                    <a class="nav-button" href="{% url 'accounts:register' %}">
+                        Create account
+                    </a>
+                {% endif %}
+            </nav>
+
+        </div>
+    </header>
+
+    <main>
+
+        <section class="institutional-hero">
+            <div class="public-container hero-inner">
+
+                <div class="hero-content">
+
+                    <h1>Understand your academic competencies.</h1>
+
+                    <p>
+                        Assess your knowledge, record your competency
+                        ratings and review your previous assessments.
+                    </p>
+
+                    <div class="hero-actions">
+
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'accounts:dashboard' %}"
+                               class="button button-white">
+                                Open dashboard
+                            </a>
+                        {% else %}
+                            <a href="{% url 'accounts:register' %}"
+                               class="button button-white">
+                                Create account
+                            </a>
+
+                            <a href="{% url 'accounts:login' %}"
+                               class="button button-outline">
+                                Sign in
+                            </a>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <section class="institutional-process">
+            <div class="public-container">
+
+                <h2>How it works</h2>
+
+                <div class="process-grid">
+
+                    <article class="process-item">
+                        <span class="process-number">01</span>
+                        <h3>Review</h3>
+                        <p>Read each academic competency statement.</p>
+                    </article>
+
+                    <article class="process-item">
+                        <span class="process-number">02</span>
+                        <h3>Assess</h3>
+                        <p>Rate your current level of understanding.</p>
+                    </article>
+
+                    <article class="process-item">
+                        <span class="process-number">03</span>
+                        <h3>Track</h3>
+                        <p>Review and manage your saved assessments.</p>
+                    </article>
+
+                </div>
+
+                <p class="assessment-note">
+                    Self-assessment ratings are not official academic grades.
+                </p>
+
+            </div>
+        </section>
+
+        <section class="institutional-workspace">
+            <div class="public-container">
+
+                <h2>Features</h2>
+
+                <div class="feature-grid">
+
+                    <article class="feature-card">
+
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="1.7"
+                                 stroke-linecap="round" stroke-linejoin="round"
+                                 aria-hidden="true">
+                                <rect x="5" y="3" width="14" height="18" rx="2"/>
+                                <path d="M9 8h6M9 12h6M9 16h4"/>
+                            </svg>
+                        </div>
+
+                        <h3>Self-assessment</h3>
+                        <p>Record your academic competency ratings.</p>
+
+                    </article>
+
+                    <article class="feature-card">
+
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="1.7"
+                                 stroke-linecap="round" stroke-linejoin="round"
+                                 aria-hidden="true">
+                                <circle cx="12" cy="12" r="9"/>
+                                <path d="M12 7v5l3 2"/>
+                            </svg>
+                        </div>
+
+                        <h3>Assessment history</h3>
+                        <p>Access and manage your previous assessments.</p>
+
+                    </article>
+
+                    <article class="feature-card">
+
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="1.7"
+                                 stroke-linecap="round" stroke-linejoin="round"
+                                 aria-hidden="true">
+                                <circle cx="12" cy="8" r="4"/>
+                                <path d="M5 21v-2a7 7 0 0 1 14 0v2"/>
+                            </svg>
+                        </div>
+
+                        <h3>My profile</h3>
+                        <p>Manage your personal account information.</p>
+
+                    </article>
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="public-footer">
+        <div class="public-container footer-inner">
+
+            <strong>PathImpact</strong>
+
+            <span>
+                Academic Prerequisite Impact and Readiness Analyzer
+            </span>
+
+        </div>
+    </footer>
+
+</body>
+</html>

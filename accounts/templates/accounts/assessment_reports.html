@@ -1,0 +1,880 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Assessment Reports{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+
+<link rel="stylesheet"
+      href="{% static 'accounts/assessment_reports.css' %}?v=07g">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="am-workspace ar-workspace">
+
+    <header class="am-heading ar-heading">
+
+        <div>
+
+            <h1>Assessment Reports</h1>
+
+            <p>
+                Monitor assessment participation
+                and competency trends.
+            </p>
+
+        </div>
+
+        {% if not filters.errors %}
+
+        <div class="ar-header-actions">
+
+            <button type="button"
+                    class="am-button"
+                    id="ar-print-button">
+
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.7"
+                     aria-hidden="true">
+                    <path d="M6 9V3h12v6"/>
+                    <rect x="6" y="14" width="12" height="7"/>
+                    <path d="M6 17H3V9h18v8h-3"/>
+                    <path d="M17 11h1"/>
+                </svg>
+
+                Print report
+
+            </button>
+
+            <a class="am-button am-primary"
+               href="{% url 'accounts:assessment_reports_export' %}?{{ export_query }}">
+
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.7"
+                     aria-hidden="true">
+                    <path d="M12 3v12m-5-5 5 5 5-5"/>
+                    <path d="M4 16v5h16v-5"/>
+                </svg>
+
+                Export CSV
+
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </header>
+
+
+    <section class="ar-print-heading">
+
+        <h2>PathImpact Assessment Report</h2>
+
+        <p>
+            Generated:
+            {{ generated_at|date:"F d, Y, g:i A T" }}
+        </p>
+
+        <p>
+            Period: {{ filters.period }}
+            |
+            {{ filters.start|default:"All time" }}
+            to
+            {{ filters.end|default:"All time" }}
+        </p>
+
+        <p>
+            Program:
+            {% for program in programs %}
+                {% if program.pk == filters.program_id %}
+                    {{ program.code }}
+                {% endif %}
+            {% endfor %}
+            {% if not filters.program_id %}
+                All programs
+            {% endif %}
+
+            |
+
+            Subject:
+            {% for subject in available_subjects %}
+                {% if subject.pk == filters.subject_id %}
+                    {{ subject.code }}
+                {% endif %}
+            {% endfor %}
+            {% if not filters.subject_id %}
+                All subjects
+            {% endif %}
+        </p>
+
+    </section>
+
+
+    <section class="am-panel ar-filter-panel">
+
+        <form method="get"
+              class="ar-filter-form"
+              id="ar-filter-form">
+
+            <div class="ar-field">
+
+                <label for="ar-period">Date range</label>
+
+                <select name="period" id="ar-period">
+
+                    {% for value, label in period_choices %}
+
+                    <option value="{{ value }}"
+                        {% if filters.period == value %}
+                            selected
+                        {% endif %}>
+
+                        {{ label }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="ar-field">
+
+                <label for="ar-program">Program</label>
+
+                <select name="program" id="ar-program">
+
+                    <option value="">All programs</option>
+
+                    {% for program in programs %}
+
+                    <option value="{{ program.pk }}"
+                        {% if filters.program_id == program.pk %}
+                            selected
+                        {% endif %}>
+
+                        {{ program.code }} - {{ program.name }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="ar-field">
+
+                <label for="ar-subject">Subject</label>
+
+                <select name="subject" id="ar-subject">
+
+                    <option value="">All subjects</option>
+
+                    {% for subject in available_subjects %}
+
+                    <option value="{{ subject.pk }}"
+                            data-program="{{ subject.program_id }}"
+                        {% if filters.subject_id == subject.pk %}
+                            selected
+                        {% endif %}>
+
+                        {{ subject.program.code }} |
+                        {{ subject.code }} - {{ subject.name }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="ar-filter-actions">
+
+                <button type="submit"
+                        class="am-button am-primary">
+
+                    Apply filters
+
+                </button>
+
+                <a href="{% url 'accounts:assessment_reports' %}"
+                   class="am-button">
+
+                    Reset
+
+                </a>
+
+            </div>
+
+            <div class="ar-custom-dates"
+                 id="ar-custom-dates">
+
+                <div class="ar-field">
+
+                    <label for="ar-start">Start date</label>
+
+                    <input type="date"
+                           name="start"
+                           id="ar-start"
+                           value="{{ filters.start|date:'Y-m-d' }}">
+
+                </div>
+
+                <div class="ar-field">
+
+                    <label for="ar-end">End date</label>
+
+                    <input type="date"
+                           name="end"
+                           id="ar-end"
+                           value="{{ filters.end|date:'Y-m-d' }}">
+
+                </div>
+
+            </div>
+
+        </form>
+
+        {% if filters.errors %}
+
+        <div class="ar-errors" role="alert">
+
+            {% for error in filters.errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    {% if not filters.errors %}
+
+    <div class="ar-period-caption">
+
+        <span>
+
+            {% if filters.start and filters.end %}
+
+                {{ filters.start|date:"M d, Y" }}
+                –
+                {{ filters.end|date:"M d, Y" }}
+
+            {% else %}
+
+                All-time assessment records
+
+            {% endif %}
+
+        </span>
+
+        <span>
+            Filtered by assessment start date
+        </span>
+
+    </div>
+
+
+    <section class="ar-summary-grid"
+             aria-label="Assessment statistics">
+
+        <article class="ar-summary-card">
+
+            <div class="ar-summary-top">
+
+                <span>Total assessments</span>
+
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.7"
+                     aria-hidden="true">
+                    <rect x="5" y="4" width="14" height="18" rx="2"/>
+                    <path d="M9 2h6v4H9zM9 11h6M9 15h6"/>
+                </svg>
+
+            </div>
+
+            <strong>{{ total_count }}</strong>
+
+            <p>Assessment sessions started</p>
+
+        </article>
+
+
+        <article class="ar-summary-card">
+
+            <div class="ar-summary-top">
+
+                <span>Completed assessments</span>
+
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.7"
+                     aria-hidden="true">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="m8 12 3 3 5-6"/>
+                </svg>
+
+            </div>
+
+            <strong>{{ completed_count }}</strong>
+
+            <p>{{ completion_rate }}% completion rate</p>
+
+        </article>
+
+
+        <article class="ar-summary-card">
+
+            <div class="ar-summary-top">
+
+                <span>Participating students</span>
+
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.7"
+                     aria-hidden="true">
+                    <circle cx="9" cy="8" r="3"/>
+                    <path d="M3 21v-3a6 6 0 0 1 12 0v3"/>
+                    <path d="M16 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 5"/>
+                </svg>
+
+            </div>
+
+            <strong>{{ student_count }}</strong>
+
+            <p>Distinct student accounts</p>
+
+        </article>
+
+
+        <article class="ar-summary-card">
+
+            <div class="ar-summary-top">
+
+                <span>Average self-rating</span>
+
+                <svg viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.7"
+                     aria-hidden="true">
+                    <path d="M3 3v18h18M7 16v-4M12 16V8M17 16V5"/>
+                </svg>
+
+            </div>
+
+            {% if ratings_visible %}
+
+                <strong>
+                    {{ average_rating|floatformat:2 }}
+                    <small>/ 5</small>
+                </strong>
+
+                <p>{{ response_count }} rating responses</p>
+
+            {% else %}
+
+                <strong>—</strong>
+
+                <p>Insufficient rating contributors</p>
+
+            {% endif %}
+
+        </article>
+
+    </section>
+
+
+    <div class="ar-overview-grid">
+
+        <section class="am-panel ar-chart-panel">
+
+            <div class="am-panel-heading">
+
+                <div>
+
+                    <h2>Assessment activity</h2>
+
+                    <p class="ar-panel-description">
+                        Completions within the selected cohort
+                    </p>
+
+                </div>
+
+            </div>
+
+            {% if activity_preview %}
+
+            <div class="ar-activity-chart">
+
+                {% for item in activity_preview %}
+
+                <div class="ar-activity-column">
+
+                    <span class="ar-chart-count">
+                        {{ item.total }}
+                    </span>
+
+                    <div class="ar-bar-track">
+
+                        <div class="ar-chart-bar"
+                             style="height: {{ item.height }}%;"
+                             title="{{ item.date }}: {{ item.total }} completed">
+                        </div>
+
+                    </div>
+
+                    <span class="ar-chart-label">
+                        {{ item.date|date:"M d" }}
+                    </span>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="ar-chart-footnote">
+
+                {% if activity_truncated %}
+
+                    Latest 30 dates with completed assessments.
+                    Export CSV for the full activity history.
+
+                {% else %}
+
+                    Only dates with completed assessments
+                    are shown.
+
+                {% endif %}
+
+            </div>
+
+            {% else %}
+
+            <div class="ar-empty">
+
+                <strong>No completed assessments</strong>
+
+                <p>
+                    Completion activity will appear
+                    when records match your filters.
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </section>
+
+
+        <section class="am-panel ar-chart-panel">
+
+            <div class="am-panel-heading">
+
+                <div>
+
+                    <h2>Rating distribution</h2>
+
+                    <p class="ar-panel-description">
+                        Completed assessment responses
+                    </p>
+
+                </div>
+
+            </div>
+
+            {% if ratings_visible %}
+
+            <div class="ar-distribution">
+
+                {% for item in distribution %}
+
+                <div class="ar-distribution-row">
+
+                    <div class="ar-distribution-label">
+
+                        <span>
+                            {{ item.rating }} · {{ item.label }}
+                        </span>
+
+                        <strong>
+                            {{ item.count }}
+                            ({{ item.percentage }}%)
+                        </strong>
+
+                    </div>
+
+                    <div class="ar-progress-track">
+
+                        <div class="ar-progress-fill"
+                             style="width: {{ item.percentage }}%;">
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% else %}
+
+            <div class="ar-empty">
+
+                <strong>Rating statistics unavailable</strong>
+
+                <p>
+                    At least {{ privacy_threshold }}
+                    distinct students must contribute ratings
+                    before aggregate ratings are displayed.
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+
+
+    <section class="am-panel ar-table-panel">
+
+        <div class="am-panel-heading">
+
+            <div>
+
+                <h2>Competency gap report</h2>
+
+                <p class="ar-panel-description">
+
+                    Competencies ordered by lowest
+                    average self-rating.
+
+                </p>
+
+            </div>
+
+            <span>
+                {{ competencies|length }} reportable competencies
+            </span>
+
+        </div>
+
+        <div class="am-table-wrap">
+
+            <table class="am-table ar-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th scope="col">Code</th>
+                        <th scope="col">Competency</th>
+                        <th scope="col">Students</th>
+                        <th scope="col">Responses</th>
+                        <th scope="col">Average rating</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for item in competencies %}
+
+                    <tr>
+
+                        <td>
+                            <strong>{{ item.code }}</strong>
+                        </td>
+
+                        <td>{{ item.name }}</td>
+
+                        <td>{{ item.students }}</td>
+
+                        <td>{{ item.responses }}</td>
+
+                        <td>
+                            <span class="ar-rating-value">
+                                {{ item.average|floatformat:2 }} / 5
+                            </span>
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="5">
+
+                            <div class="ar-empty">
+
+                                <strong>
+                                    No reportable competency statistics
+                                </strong>
+
+                                <p>
+                                    Each competency requires ratings
+                                    from at least
+                                    {{ privacy_threshold }}
+                                    distinct students.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <section class="am-panel ar-table-panel">
+
+        <div class="am-panel-heading">
+
+            <div>
+
+                <h2>Subject analysis</h2>
+
+                <p class="ar-panel-description">
+                    Aggregated self-ratings by academic subject
+                </p>
+
+            </div>
+
+            <span>
+                {{ subjects|length }} reportable subjects
+            </span>
+
+        </div>
+
+        <div class="am-table-wrap">
+
+            <table class="am-table ar-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th scope="col">Program</th>
+                        <th scope="col">Subject</th>
+                        <th scope="col">Students</th>
+                        <th scope="col">Responses</th>
+                        <th scope="col">Average rating</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for item in subjects %}
+
+                    <tr>
+
+                        <td>{{ item.program }}</td>
+
+                        <td>
+
+                            <div class="ar-subject-name">
+
+                                <strong>{{ item.code }}</strong>
+
+                                <span>{{ item.name }}</span>
+
+                            </div>
+
+                        </td>
+
+                        <td>{{ item.students }}</td>
+
+                        <td>{{ item.responses }}</td>
+
+                        <td>
+
+                            <span class="ar-rating-value">
+
+                                {{ item.average|floatformat:2 }} / 5
+
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="5">
+
+                            <div class="ar-empty">
+
+                                <strong>
+                                    No reportable subject statistics
+                                </strong>
+
+                                <p>
+                                    Each subject requires ratings
+                                    from at least
+                                    {{ privacy_threshold }}
+                                    distinct students.
+                                </p>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <section class="ar-report-notes">
+
+        <strong>Understanding this report</strong>
+
+        <p>
+            Reports include repeated assessment attempts.
+            Average ratings are calculated per recorded
+            response, not per student.
+        </p>
+
+        <p>
+            Rating statistics are suppressed for groups
+            with fewer than {{ privacy_threshold }}
+            distinct rating contributors.
+        </p>
+
+        <p>
+            Self-assessment results do not represent official
+            grades, objective competency mastery, or predicted
+            academic performance.
+        </p>
+
+    </section>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+
+<script>
+
+    (() => {
+
+        const period = document.getElementById("ar-period");
+        const customDates = document.getElementById("ar-custom-dates");
+        const start = document.getElementById("ar-start");
+        const end = document.getElementById("ar-end");
+
+        const program = document.getElementById("ar-program");
+        const subject = document.getElementById("ar-subject");
+
+        const printButton = document.getElementById(
+            "ar-print-button"
+        );
+
+        function updateDates() {
+
+            const custom = period.value === "custom";
+
+            customDates.hidden = !custom;
+
+            start.disabled = !custom;
+            end.disabled = !custom;
+
+            start.required = custom;
+            end.required = custom;
+
+        }
+
+        function updateSubjects() {
+
+            const selectedProgram = program.value;
+
+            Array.from(subject.options).forEach(option => {
+
+                const allowed =
+                    !option.value ||
+                    !selectedProgram ||
+                    option.dataset.program === selectedProgram;
+
+                option.hidden = !allowed;
+                option.disabled = !allowed;
+
+                if (!allowed && option.selected) {
+
+                    subject.value = "";
+
+                }
+
+            });
+
+        }
+
+        period.addEventListener("change", updateDates);
+        program.addEventListener("change", updateSubjects);
+
+        if (printButton) {
+
+            printButton.addEventListener("click", () => {
+
+                window.print();
+
+            });
+
+        }
+
+        updateDates();
+        updateSubjects();
+
+    })();
+
+</script>
+
+{% endblock %}

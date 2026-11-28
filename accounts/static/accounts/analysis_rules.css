@@ -1,0 +1,921 @@
+/* PATHIMPACT
+   Phase 07H.3 - Analysis Rules Workspace
+*/
+
+.rules-workspace {
+
+    --rules-primary: #800020;
+    --rules-primary-hover: #650019;
+    --rules-text: #18181b;
+    --rules-muted: #71717a;
+    --rules-border: #e4e4e7;
+    --rules-soft: #fafafa;
+
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    width: 100%;
+    max-width: 1440px;
+    min-width: 0;
+
+    margin: 0 auto;
+
+    color: var(--rules-text);
+
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+}
+
+.rules-workspace,
+.rules-workspace * {
+    box-sizing: border-box;
+}
+
+
+/* PAGE HEADING */
+
+.rules-workspace .rules-heading {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 14px;
+    padding-bottom: 4px;
+}
+
+.rules-workspace .rules-eyebrow {
+
+    margin-bottom: 7px;
+
+    color: var(--rules-muted);
+
+    font-size: 10px;
+    font-weight: 650;
+    letter-spacing: 1px;
+}
+
+.rules-workspace .rules-heading h1 {
+
+    margin: 0 0 6px;
+
+    font-size: 27px;
+    font-weight: 650;
+    letter-spacing: -.7px;
+}
+
+.rules-workspace .rules-heading p {
+
+    margin: 0;
+
+    color: var(--rules-muted);
+    line-height: 1.6;
+}
+
+.rules-workspace .rules-version {
+
+    display: inline-flex;
+    align-items: center;
+
+    padding: 8px 12px;
+
+    border: 1px solid var(--rules-border);
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: var(--rules-primary);
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* OVERVIEW METRICS */
+
+.rules-workspace .rules-metrics {
+
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: 14px;
+}
+
+.rules-workspace .rules-metric {
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+    min-width: 0;
+
+    padding: 18px;
+
+    background: #ffffff;
+
+    border: 1px solid var(--rules-border);
+    border-radius: 9px;
+}
+
+.rules-workspace .rules-metric > span {
+
+    color: var(--rules-muted);
+
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.rules-workspace .rules-metric > strong {
+
+    color: var(--rules-primary);
+
+    font-size: 25px;
+    font-weight: 650;
+    letter-spacing: -.6px;
+}
+
+.rules-workspace .rules-metric > small {
+
+    color: var(--rules-muted);
+
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+
+/* PANEL LAYOUT */
+
+.rules-workspace .rules-grid {
+
+    display: grid;
+    align-items: stretch;
+
+    gap: 18px;
+}
+
+.rules-workspace .rules-grid-main {
+
+    grid-template-columns:
+        minmax(0, 1.65fr)
+        minmax(0, 1fr);
+}
+
+.rules-workspace .rules-grid-equal {
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+}
+
+.rules-workspace .rules-panel {
+
+    min-width: 0;
+
+    background: #ffffff;
+
+    border: 1px solid var(--rules-border);
+    border-radius: 9px;
+}
+
+.rules-workspace .rules-panel-heading {
+
+    padding: 19px 20px 17px;
+
+    border-bottom: 1px solid #eeeeef;
+}
+
+.rules-workspace .rules-panel-heading h2 {
+
+    margin: 0 0 6px;
+
+    font-size: 16px;
+    font-weight: 650;
+    letter-spacing: -.2px;
+}
+
+.rules-workspace .rules-panel-heading p {
+
+    margin: 0;
+
+    color: var(--rules-muted);
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.rules-workspace .rules-heading-inline {
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    gap: 10px;
+}
+
+.rules-workspace .rules-panel-note {
+
+    padding: 13px 20px;
+
+    background: var(--rules-soft);
+
+    border-top: 1px solid #eeeeef;
+    border-radius: 0 0 9px 9px;
+
+    color: var(--rules-muted);
+
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+
+/* DATA TABLES */
+
+.rules-workspace .rules-table-wrap {
+
+    width: 100%;
+    overflow-x: auto;
+}
+
+.rules-workspace .rules-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    text-align: left;
+    font-size: 12px;
+}
+
+.rules-workspace .rules-table th {
+
+    padding: 12px 18px;
+
+    background: #fafafa;
+
+    color: #52525b;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.rules-workspace .rules-table td {
+
+    padding: 14px 18px;
+
+    border-top: 1px solid #eeeeef;
+
+    color: #3f3f46;
+
+    line-height: 1.5;
+    vertical-align: middle;
+}
+
+.rules-workspace .rules-table tbody tr:hover {
+
+    background: #fcfcfc;
+}
+
+.rules-workspace .rules-rating {
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 28px;
+    height: 28px;
+
+    border: 1px solid var(--rules-border);
+    border-radius: 5px;
+
+    color: var(--rules-primary);
+
+    font-weight: 650;
+}
+
+.rules-workspace .rules-pill {
+
+    display: inline-flex;
+    align-items: center;
+
+    padding: 5px 9px;
+
+    border-radius: 5px;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.rules-workspace .rules-pill-gap {
+
+    background: #f8ebee;
+    color: #800020;
+}
+
+.rules-workspace .rules-pill-neutral {
+
+    background: #f4f4f5;
+    color: #52525b;
+}
+
+
+/* RELEVANCE */
+
+.rules-workspace .rules-relevance {
+
+    padding: 5px 20px;
+}
+
+.rules-workspace .rules-relevance-row {
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+    padding: 20px 0;
+
+    border-bottom: 1px solid #eeeeef;
+}
+
+.rules-workspace .rules-relevance-row:last-child {
+
+    border-bottom: 0;
+}
+
+.rules-workspace .rules-relevance-row strong {
+
+    display: block;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.rules-workspace .rules-relevance-row small {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: var(--rules-muted);
+
+    font-size: 11px;
+}
+
+.rules-workspace .rules-weight-blocks {
+
+    display: flex;
+    gap: 5px;
+}
+
+.rules-workspace .rules-weight-blocks span {
+
+    width: 24px;
+    height: 8px;
+
+    background: #e4e4e7;
+
+    border-radius: 3px;
+}
+
+.rules-workspace .rules-weight-blocks .is-filled {
+
+    background: var(--rules-primary);
+}
+
+
+/* READINESS CLASSIFICATIONS */
+
+.rules-workspace .rules-classifications {
+
+    padding: 0 20px;
+}
+
+.rules-workspace .rules-classification {
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+    padding: 16px 0;
+
+    border-bottom: 1px solid #eeeeef;
+}
+
+.rules-workspace .rules-classification:last-child {
+
+    border-bottom: 0;
+}
+
+.rules-workspace .rules-status-dot {
+
+    flex: 0 0 9px;
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+}
+
+.rules-workspace .rules-strengthening {
+
+    background: #ad5944;
+}
+
+.rules-workspace .rules-developing {
+
+    background: #b18a39;
+}
+
+.rules-workspace .rules-higher {
+
+    background: #468361;
+}
+
+.rules-workspace .rules-classification-name {
+
+    flex: 1;
+    min-width: 0;
+}
+
+.rules-workspace .rules-classification-name strong {
+
+    display: block;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.rules-workspace .rules-classification-name small {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color: var(--rules-muted);
+
+    font-size: 11px;
+}
+
+.rules-workspace .rules-range {
+
+    color: #52525b;
+
+    font-size: 12px;
+    font-weight: 550;
+
+    text-align: right;
+}
+
+
+/* FORMULAS */
+
+.rules-workspace .rules-formula {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    min-height: 90px;
+    margin: 18px 20px;
+    padding: 16px;
+
+    background: #faf6f7;
+
+    border: 1px solid #f0e3e7;
+    border-radius: 6px;
+
+    color: var(--rules-primary);
+
+    font-size: 15px;
+    font-weight: 600;
+
+    text-align: center;
+}
+
+.rules-workspace .rules-fraction {
+
+    display: flex;
+    flex-direction: column;
+}
+
+.rules-workspace .rules-fraction span {
+
+    padding: 5px;
+}
+
+.rules-workspace .rules-fraction span:first-child {
+
+    border-bottom: 1px solid var(--rules-primary);
+}
+
+.rules-workspace .rules-formula-description {
+
+    padding: 0 20px 15px;
+
+    color: var(--rules-muted);
+
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.rules-workspace .rules-formula-description p {
+
+    margin: 0 0 8px;
+}
+
+
+/* SIMULATOR */
+
+.rules-workspace #calculation-simulator {
+
+    scroll-margin-top: 85px;
+}
+
+.rules-workspace .rules-input-table {
+
+    min-width: 460px;
+}
+
+.rules-workspace .rules-input-table th:first-child {
+
+    width: 44%;
+}
+
+.rules-workspace .ar-select {
+
+    display: block;
+
+    width: 100%;
+    min-width: 95px;
+    min-height: 36px;
+
+    padding: 7px 10px;
+
+    background: #ffffff;
+
+    border: 1px solid #d4d4d8;
+    border-radius: 5px;
+
+    color: var(--rules-text);
+
+    font: inherit;
+}
+
+.rules-workspace .ar-select:focus {
+
+    outline: 2px solid #d9a4b2;
+    outline-offset: 1px;
+
+    border-color: var(--rules-primary);
+}
+
+.rules-workspace .rules-actions {
+
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 9px;
+    padding: 18px 20px;
+}
+
+.rules-workspace .rules-button-primary,
+.rules-workspace .rules-button-secondary {
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 37px;
+    padding: 9px 15px;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.rules-workspace .rules-button-primary {
+
+    background: var(--rules-primary);
+    color: #ffffff;
+}
+
+.rules-workspace .rules-button-primary:hover {
+
+    background: var(--rules-primary-hover);
+}
+
+.rules-workspace .rules-button-secondary {
+
+    background: #ffffff;
+
+    border-color: var(--rules-border);
+
+    color: #52525b;
+}
+
+.rules-workspace .rules-button-secondary:hover {
+
+    background: #f4f4f5;
+}
+
+.rules-workspace .rules-simulation-results {
+
+    margin: 0 20px 20px;
+    padding: 18px;
+
+    border: 1px solid var(--rules-border);
+    border-radius: 7px;
+
+    background: #fafafa;
+}
+
+.rules-workspace .rules-simulation-results h3 {
+
+    margin: 0 0 14px;
+
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.rules-workspace .rules-simulation-metrics {
+
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+.rules-workspace .rules-simulation-metrics > div {
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+    padding: 14px;
+
+    background: #ffffff;
+
+    border: 1px solid var(--rules-border);
+    border-radius: 6px;
+}
+
+.rules-workspace .rules-simulation-metrics span {
+
+    color: var(--rules-muted);
+
+    font-size: 11px;
+}
+
+.rules-workspace .rules-simulation-metrics strong {
+
+    color: var(--rules-primary);
+
+    font-size: 17px;
+    font-weight: 650;
+}
+
+.rules-workspace .rules-calculation-detail {
+
+    margin: 15px 0 20px;
+
+    color: #52525b;
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.rules-workspace .rules-simulation-results .rules-table {
+
+    min-width: 480px;
+
+    background: #ffffff;
+}
+
+.rules-workspace .rules-priority {
+
+    color: var(--rules-primary);
+}
+
+.rules-workspace .rules-empty {
+
+    padding: 18px;
+
+    background: #ffffff;
+
+    border: 1px dashed #d4d4d8;
+    border-radius: 6px;
+
+    color: var(--rules-muted);
+
+    text-align: center;
+    line-height: 1.6;
+}
+
+.rules-workspace .rules-error {
+
+    margin: 15px 20px;
+    padding: 12px;
+
+    background: #fff2f2;
+
+    border: 1px solid #efcaca;
+    border-radius: 6px;
+
+    color: #9f2424;
+}
+
+.rules-workspace .errorlist {
+
+    margin: 5px 0 0;
+    padding-left: 15px;
+
+    color: #9f2424;
+
+    font-size: 11px;
+}
+
+
+/* SAFEGUARDS */
+
+.rules-workspace .rules-safeguards {
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 14px;
+    padding: 20px;
+
+    background: #ffffff;
+
+    border: 1px solid var(--rules-border);
+    border-radius: 9px;
+}
+
+.rules-workspace .rules-shield {
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    flex: 0 0 38px;
+
+    width: 38px;
+    height: 38px;
+
+    background: #f8ebee;
+
+    border-radius: 7px;
+
+    color: var(--rules-primary);
+}
+
+.rules-workspace .rules-shield svg {
+
+    width: 21px;
+    height: 21px;
+}
+
+.rules-workspace .rules-safeguards h2 {
+
+    margin: 0 0 8px;
+
+    font-size: 14px;
+    font-weight: 650;
+}
+
+.rules-workspace .rules-safeguards p {
+
+    margin: 0 0 7px;
+
+    color: var(--rules-muted);
+
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.rules-workspace .rules-safeguards p:last-child {
+
+    margin-bottom: 0;
+}
+
+.rules-workspace .rules-sr-only {
+
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    padding: 0;
+    margin: -1px;
+
+    overflow: hidden;
+
+    clip: rect(0, 0, 0, 0);
+
+    white-space: nowrap;
+
+    border: 0;
+}
+
+
+/* RESPONSIVE WORKSPACE */
+
+@media (max-width: 1100px) {
+
+    .rules-workspace .rules-metrics {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .rules-workspace .rules-grid-main {
+
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 650px) {
+
+    .rules-workspace {
+
+        gap: 14px;
+    }
+
+    .rules-workspace .rules-grid-equal,
+    .rules-workspace .rules-simulation-metrics {
+
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .rules-workspace .rules-metrics {
+
+        gap: 10px;
+    }
+
+    .rules-workspace .rules-metric {
+
+        padding: 13px;
+    }
+
+    .rules-workspace .rules-metric > strong {
+
+        font-size: 21px;
+    }
+
+    .rules-workspace .rules-heading h1 {
+
+        font-size: 23px;
+    }
+
+    .rules-workspace .rules-panel-heading {
+
+        padding: 15px;
+    }
+
+    .rules-workspace .rules-table th,
+    .rules-workspace .rules-table td {
+
+        padding: 12px;
+    }
+
+    .rules-workspace .rules-formula {
+
+        margin: 15px;
+
+        font-size: 13px;
+    }
+
+    .rules-workspace .rules-simulation-results {
+
+        margin: 0 12px 12px;
+        padding: 12px;
+    }
+
+    .rules-workspace .rules-range {
+
+        max-width: 110px;
+
+        font-size: 11px;
+    }
+
+    .rules-workspace .rules-safeguards {
+
+        padding: 15px;
+    }
+}

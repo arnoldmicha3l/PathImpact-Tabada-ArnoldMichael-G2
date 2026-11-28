@@ -1,0 +1,308 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Account Details{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+
+<link rel="stylesheet"
+      href="{% static 'accounts/user_management.css' %}?v=07f">
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="am-workspace um-workspace um-detail-workspace">
+
+    <a class="am-back"
+       href="{% url 'accounts:users' %}">
+
+        ← Back to User Management
+
+    </a>
+
+
+    <header class="am-heading">
+
+        <div>
+
+            <h1>Account details</h1>
+
+            <p>
+                View account information and access status.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <section class="um-profile-card">
+
+        <div class="um-profile-identity">
+
+            <span class="um-avatar um-avatar-large"
+                  aria-hidden="true">
+
+                {{ account.username|slice:":1"|upper }}
+
+            </span>
+
+            <div class="um-profile-name">
+
+                <h2>
+
+                    {{ account.get_full_name|default:account.username }}
+
+                </h2>
+
+                <p>@{{ account.username }}</p>
+
+                <div class="um-profile-badges">
+
+                    <span class="um-role">
+
+                        {{ account.get_role_display }}
+
+                    </span>
+
+                    {% if account.is_active %}
+
+                    <span class="um-status um-active">
+
+                        <span class="um-dot"></span>
+
+                        Active
+
+                    </span>
+
+                    {% else %}
+
+                    <span class="um-status um-inactive">
+
+                        <span class="um-dot"></span>
+
+                        Inactive
+
+                    </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {% if can_manage_status %}
+
+            {% if account.is_active %}
+
+            <a class="am-button um-deactivate"
+               href="{% url 'accounts:user_status' account.pk 'deactivate' %}">
+
+                Deactivate account
+
+            </a>
+
+            {% else %}
+
+            <a class="am-button am-primary"
+               href="{% url 'accounts:user_status' account.pk 'activate' %}">
+
+                Activate account
+
+            </a>
+
+            {% endif %}
+
+        {% endif %}
+
+    </section>
+
+
+    <section class="am-panel um-detail-panel">
+
+        <div class="am-panel-heading">
+
+            <h2>Personal information</h2>
+
+        </div>
+
+        <dl class="um-information-grid">
+
+            <div class="um-information-field">
+
+                <dt>First name</dt>
+
+                <dd>
+                    {{ account.first_name|default:"Not provided" }}
+                </dd>
+
+            </div>
+
+            <div class="um-information-field">
+
+                <dt>Last name</dt>
+
+                <dd>
+                    {{ account.last_name|default:"Not provided" }}
+                </dd>
+
+            </div>
+
+            <div class="um-information-field">
+
+                <dt>Username</dt>
+
+                <dd>{{ account.username }}</dd>
+
+            </div>
+
+            <div class="um-information-field">
+
+                <dt>Email address</dt>
+
+                <dd>
+                    {{ account.email|default:"Not provided" }}
+                </dd>
+
+            </div>
+
+        </dl>
+
+    </section>
+
+
+    <section class="am-panel um-detail-panel">
+
+        <div class="am-panel-heading">
+
+            <h2>Account information</h2>
+
+        </div>
+
+        <dl class="um-information-grid">
+
+            <div class="um-information-field">
+
+                <dt>Account ID</dt>
+
+                <dd>#{{ account.pk }}</dd>
+
+            </div>
+
+            <div class="um-information-field">
+
+                <dt>Account role</dt>
+
+                <dd>{{ account.get_role_display }}</dd>
+
+            </div>
+
+            <div class="um-information-field">
+
+                <dt>Date registered</dt>
+
+                <dd>
+
+                    {{ account.date_joined|date:"F d, Y" }}
+
+                </dd>
+
+            </div>
+
+            <div class="um-information-field">
+
+                <dt>Last sign-in</dt>
+
+                <dd>
+
+                    {% if account.last_login %}
+
+                        {{ account.last_login|date:"M d, Y, g:i A T" }}
+
+                    {% else %}
+
+                        No recorded sign-in
+
+                    {% endif %}
+
+                </dd>
+
+            </div>
+
+            <div class="um-information-field">
+
+                <dt>Account status</dt>
+
+                <dd>
+
+                    {% if account.is_active %}
+
+                        Active
+
+                    {% else %}
+
+                        Inactive
+
+                    {% endif %}
+
+                </dd>
+
+            </div>
+
+            <div class="um-information-field">
+
+                <dt>Access management</dt>
+
+                <dd>
+
+                    {% if can_manage_status %}
+
+                        Manageable
+
+                    {% else %}
+
+                        Protected account
+
+                    {% endif %}
+
+                </dd>
+
+            </div>
+
+        </dl>
+
+    </section>
+
+
+    <div class="um-notice">
+
+        <strong>Account privacy and protection</strong>
+
+        <p>
+
+            Passwords, authentication credentials and individual
+            assessment answers are not displayed in this workspace.
+
+            {% if not can_manage_status %}
+
+                This account is protected against
+                administrative status changes.
+
+            {% endif %}
+
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

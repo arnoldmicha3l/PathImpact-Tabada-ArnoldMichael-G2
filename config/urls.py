@@ -1,19 +1,32 @@
+
 from django.contrib import admin
 from django.urls import include, path
-from django.views.generic import RedirectView
+from django.views.generic import TemplateView
 
 
 urlpatterns = [
     path(
         "",
-        RedirectView.as_view(
-            pattern_name="accounts:dashboard",
-            permanent=False,
+        TemplateView.as_view(
+            template_name="accounts/landing.html"
         ),
         name="home",
     ),
-    path("admin/", admin.site.urls),
-    path("accounts/", include("accounts.urls")),
+
+    path(
+        "admin/",
+        admin.site.urls,
+    ),
+
+    path(
+        "accounts/",
+        include("accounts.urls"),
+    ),
+
+    path(
+        "assessments/",
+        include("assessments.urls"),
+    ),
 ]
 
 

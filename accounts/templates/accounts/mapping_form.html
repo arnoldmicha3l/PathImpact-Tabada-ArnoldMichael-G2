@@ -1,0 +1,336 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}
+
+    {% if is_protected %}
+        View competency mapping
+    {% else %}
+        {{ heading }}
+    {% endif %}
+
+{% endblock %}
+
+
+{% block extra_head %}
+
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+
+<style>
+
+.mp-form-workspace .mp-field {
+    margin-bottom: 22px;
+}
+
+.mp-form-workspace .mp-field label {
+    display: block;
+    color: #27272a;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.mp-form-workspace .mp-field select {
+    width: 100%;
+    box-sizing: border-box;
+    background: #ffffff;
+    color: #27272a;
+    border: 1px solid #d4d4d8;
+    border-radius: 7px;
+    padding: 11px 12px;
+    font: inherit;
+    font-size: 13px;
+}
+
+.mp-form-workspace .mp-field select:focus {
+    outline: 2px solid rgba(128, 0, 32, .15);
+    border-color: #800020;
+}
+
+.mp-form-workspace .mp-help {
+    color: #71717a;
+    font-size: 11px;
+    line-height: 1.6;
+    margin-top: 6px;
+}
+
+.mp-form-workspace .mp-error {
+    color: #b91c1c;
+    font-size: 12px;
+    margin: 8px 0;
+}
+
+.mp-form-workspace .mp-required {
+    color: #800020;
+}
+
+.mp-form-workspace .mp-notice {
+    background: #fafafa;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: #52525b;
+    line-height: 1.7;
+}
+
+.mp-form-workspace .mp-notice strong {
+    display: block;
+    color: #27272a;
+    margin-bottom: 4px;
+}
+
+.mp-form-workspace .mp-readonly {
+    background: #f8f8f9;
+    border: 1px solid #e4e4e7;
+    border-radius: 7px;
+    padding: 12px;
+    color: #3f3f46;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="am-workspace am-form-workspace mp-form-workspace">
+
+    <a class="am-back"
+       href="{% url 'accounts:mappings' %}">
+
+        ← Back to competency mapping
+
+    </a>
+
+
+    <header class="am-heading">
+
+        <div>
+
+            <h1>
+
+                {% if is_protected %}
+
+                    View competency mapping
+
+                {% else %}
+
+                    {{ heading }}
+
+                {% endif %}
+
+            </h1>
+
+            <p>
+
+                Associate an academic subject
+                with a defined competency.
+
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <section class="am-panel">
+
+        <div class="am-panel-heading">
+
+            <h2>Mapping information</h2>
+
+        </div>
+
+
+        {% if is_protected %}
+
+        <div class="am-form">
+
+            <div class="mp-notice">
+
+                <strong>Protected mapping</strong>
+
+                This relationship is referenced by existing
+                student assessment responses. It cannot
+                be modified or removed.
+
+            </div>
+
+            <div class="mp-field">
+
+                <label>Academic program</label>
+
+                <div class="mp-readonly">
+
+                    {{ instance.subject.program.code }} -
+                    {{ instance.subject.program.name }}
+
+                </div>
+
+            </div>
+
+            <div class="mp-field">
+
+                <label>Academic subject</label>
+
+                <div class="mp-readonly">
+
+                    {{ instance.subject.code }} -
+                    {{ instance.subject.name }}
+
+                </div>
+
+            </div>
+
+            <div class="mp-field">
+
+                <label>Competency</label>
+
+                <div class="mp-readonly">
+
+                    {{ instance.competency.code }} -
+                    {{ instance.competency.name }}
+
+                </div>
+
+            </div>
+
+            <div class="mp-field">
+
+                <label>Competency description</label>
+
+                <div class="mp-readonly">
+
+                    {{ instance.competency.description|linebreaksbr }}
+
+                </div>
+
+            </div>
+
+            <div class="am-form-footer">
+
+                <a class="am-button"
+                   href="{% url 'accounts:mappings' %}">
+
+                    Back to mappings
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        {% else %}
+
+
+        <form method="post" class="am-form">
+
+            {% csrf_token %}
+
+            <div class="mp-notice">
+
+                <strong>Subject-to-competency relationship</strong>
+
+                Select an existing subject and competency.
+                Each subject may have multiple competencies,
+                but the same competency cannot be assigned
+                to that subject more than once.
+
+            </div>
+
+            {% for error in form.non_field_errors %}
+
+            <div class="mp-error" role="alert">
+                {{ error }}
+            </div>
+
+            {% endfor %}
+
+            {% for hidden in form.hidden_fields %}
+
+                {{ hidden }}
+
+            {% endfor %}
+
+            {% for field in form.visible_fields %}
+
+            <div class="mp-field">
+
+                <label for="{{ field.id_for_label }}">
+
+                    {{ field.label }}
+
+                    {% if field.field.required %}
+
+                    <span class="mp-required">*</span>
+
+                    {% endif %}
+
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+
+                <div class="mp-help">
+                    {{ field.help_text }}
+                </div>
+
+                {% endif %}
+
+                {% for error in field.errors %}
+
+                <div class="mp-error" role="alert">
+                    {{ error }}
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% endfor %}
+
+            <div class="am-form-footer">
+
+                <a class="am-button"
+                   href="{% url 'accounts:mappings' %}">
+
+                    Cancel
+
+                </a>
+
+                <button type="submit"
+                        class="am-button am-primary">
+
+                    {% if instance %}
+
+                        Save changes
+
+                    {% else %}
+
+                        Create mapping
+
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,216 @@
+<section class="ch-workspace">
+
+    <div class="ch-heading">
+
+        <div>
+
+            <h2>Academic Catalog Health</h2>
+
+            <p>
+                Monitor academic configuration
+                and relationship completeness.
+            </p>
+
+        </div>
+
+        <span class="ch-status">
+
+            {{ catalog_health.status }}
+
+        </span>
+
+    </div>
+
+    <div class="ch-metrics">
+
+        <article>
+
+            <span>Mapping coverage</span>
+
+            <strong>
+                {{ catalog_health.mapping_coverage }}%
+            </strong>
+
+            <small>
+
+                {{ catalog_health.mapped_subject_count }}
+                of
+                {{ catalog_health.subject_count }}
+                subjects mapped
+
+            </small>
+
+            <div class="ch-progress">
+
+                <div style="width: {{ catalog_health.mapping_coverage }}%;"></div>
+
+            </div>
+
+        </article>
+
+        <article>
+
+            <span>Prerequisite relationships</span>
+
+            <strong>
+                {{ catalog_health.prerequisite_count }}
+            </strong>
+
+            <small>Defined academic dependencies</small>
+
+        </article>
+
+        <article>
+
+            <span>Competency impacts</span>
+
+            <strong>
+                {{ catalog_health.impact_count }}
+            </strong>
+
+            <small>Defined analysis relationships</small>
+
+        </article>
+
+        <article>
+
+            <span>Integrity issues</span>
+
+            <strong>
+                {{ catalog_health.integrity_issue_count }}
+            </strong>
+
+            <small>Invalid relationship references</small>
+
+        </article>
+
+    </div>
+
+    <div class="ch-directory">
+
+        <div class="ch-directory-heading">
+
+            <h3>Configuration review</h3>
+
+            <p>
+                Review these areas before expanding
+                the academic analysis catalog.
+            </p>
+
+        </div>
+
+        <div class="ch-row">
+
+            <div>
+
+                <strong>Unmapped subjects</strong>
+
+                <small>
+                    Subjects without competency mappings
+                </small>
+
+            </div>
+
+            <span class="ch-count">
+
+                {{ catalog_health.unmapped_subject_count }}
+
+            </span>
+
+            <a href="{% url 'accounts:mappings' %}">
+
+                Review mappings
+
+            </a>
+
+        </div>
+
+        <div class="ch-row">
+
+            <div>
+
+                <strong>Uncovered prerequisites</strong>
+
+                <small>
+                    Relationships without competency impacts
+                </small>
+
+            </div>
+
+            <span class="ch-count">
+
+                {{ catalog_health.uncovered_prerequisite_count }}
+
+            </span>
+
+            <a href="{% url 'accounts:impacts' %}">
+
+                Review impacts
+
+            </a>
+
+        </div>
+
+        <div class="ch-row">
+
+            <div>
+
+                <strong>Unused competencies</strong>
+
+                <small>
+                    Competencies not assigned to subjects
+                </small>
+
+            </div>
+
+            <span class="ch-count">
+
+                {{ catalog_health.unused_competency_count }}
+
+            </span>
+
+            <a href="{% url 'accounts:competencies' %}">
+
+                Review competencies
+
+            </a>
+
+        </div>
+
+    </div>
+
+    {% if catalog_health.integrity_issue_count %}
+
+    <div class="ch-warning" role="alert">
+
+        <strong>Academic relationships require review.</strong>
+
+        <p>
+
+            Cross-program prerequisite relationships:
+
+            {{ catalog_health.invalid_prerequisite_count }}
+
+        </p>
+
+        <p>
+
+            Inconsistent competency impacts:
+
+            {{ catalog_health.invalid_impact_count }}
+
+        </p>
+
+    </div>
+
+    {% endif %}
+
+    <div class="ch-note">
+
+        Configuration gaps do not necessarily indicate
+        invalid records. Coverage checks do not establish
+        academic validity or curriculum completeness.
+
+    </div>
+
+</section>

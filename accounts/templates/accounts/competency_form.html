@@ -1,0 +1,323 @@
+
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}
+
+    {% if is_mapped %}
+        View competency
+    {% else %}
+        {{ heading }}
+    {% endif %}
+
+{% endblock %}
+
+
+{% block extra_head %}
+
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+
+<style>
+
+.cm-form-workspace .cm-field {
+    margin-bottom: 20px;
+}
+
+.cm-form-workspace .cm-field label {
+    display: block;
+    color: #27272a;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.cm-form-workspace .cm-field input,
+.cm-form-workspace .cm-field textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #d4d4d8;
+    border-radius: 7px;
+    padding: 11px 12px;
+    color: #27272a;
+    font: inherit;
+    font-size: 13px;
+}
+
+.cm-form-workspace .cm-field input:focus,
+.cm-form-workspace .cm-field textarea:focus {
+    outline: 2px solid rgba(128, 0, 32, .15);
+    border-color: #800020;
+}
+
+.cm-form-workspace .cm-field textarea {
+    min-height: 125px;
+    resize: vertical;
+}
+
+.cm-form-workspace .cm-help {
+    color: #71717a;
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 6px;
+}
+
+.cm-form-workspace .cm-required {
+    color: #800020;
+}
+
+.cm-form-workspace .cm-error {
+    color: #b91c1c;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.cm-form-workspace .cm-readonly {
+    padding: 12px;
+    background: #f8f8f9;
+    border: 1px solid #e4e4e7;
+    border-radius: 7px;
+    color: #3f3f46;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.cm-form-workspace .cm-notice {
+    border: 1px solid #e4e4e7;
+    background: #fafafa;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: #52525b;
+    line-height: 1.6;
+}
+
+.cm-form-workspace .cm-notice strong {
+    display: block;
+    color: #27272a;
+    margin-bottom: 4px;
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="am-workspace am-form-workspace cm-form-workspace">
+
+    <a class="am-back"
+       href="{% url 'accounts:competencies' %}">
+
+        ← Back to competencies
+
+    </a>
+
+
+    <header class="am-heading">
+
+        <div>
+
+            <h1>
+
+                {% if is_mapped %}
+
+                    View competency
+
+                {% else %}
+
+                    {{ heading }}
+
+                {% endif %}
+
+            </h1>
+
+            <p>
+
+                {% if is_mapped %}
+
+                    Review a protected academic competency.
+
+                {% else %}
+
+                    Define the knowledge or skill
+                    used in academic self-assessments.
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <section class="am-panel">
+
+        <div class="am-panel-heading">
+
+            <h2>Competency information</h2>
+
+        </div>
+
+
+        {% if is_mapped %}
+
+        <div class="am-form">
+
+            <div class="cm-notice">
+
+                <strong>Protected competency</strong>
+
+                This competency is currently linked to
+                an academic subject. Its definition is
+                read-only to preserve assessment consistency.
+
+            </div>
+
+            <div class="cm-field">
+
+                <label>Competency code</label>
+
+                <div class="cm-readonly">
+                    {{ instance.code }}
+                </div>
+
+            </div>
+
+            <div class="cm-field">
+
+                <label>Competency name</label>
+
+                <div class="cm-readonly">
+                    {{ instance.name }}
+                </div>
+
+            </div>
+
+            <div class="cm-field">
+
+                <label>Description</label>
+
+                <div class="cm-readonly">
+                    {{ instance.description|linebreaksbr }}
+                </div>
+
+            </div>
+
+            <div class="am-form-footer">
+
+                <a class="am-button"
+                   href="{% url 'accounts:competencies' %}">
+
+                    Back to competencies
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        {% else %}
+
+
+        <form method="post" class="am-form">
+
+            {% csrf_token %}
+
+            {% for error in form.non_field_errors %}
+
+            <div class="cm-error" role="alert">
+                {{ error }}
+            </div>
+
+            {% endfor %}
+
+
+            {% for hidden in form.hidden_fields %}
+
+                {{ hidden }}
+
+            {% endfor %}
+
+
+            {% for field in form.visible_fields %}
+
+            <div class="cm-field">
+
+                <label for="{{ field.id_for_label }}">
+
+                    {{ field.label }}
+
+                    {% if field.field.required %}
+
+                    <span class="cm-required">*</span>
+
+                    {% endif %}
+
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+
+                <div class="cm-help">
+                    {{ field.help_text }}
+                </div>
+
+                {% endif %}
+
+                {% for error in field.errors %}
+
+                <div class="cm-error" role="alert">
+                    {{ error }}
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+            {% endfor %}
+
+
+            <div class="am-form-footer">
+
+                <a class="am-button"
+                   href="{% url 'accounts:competencies' %}">
+
+                    Cancel
+
+                </a>
+
+                <button type="submit"
+                        class="am-button am-primary">
+
+                    {% if instance %}
+
+                        Save changes
+
+                    {% else %}
+
+                        Create competency
+
+                    {% endif %}
+
+                </button>
+
+            </div>
+
+        </form>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+{% endblock %}

@@ -1,8 +1,663 @@
 {% extends "accounts/base.html" %}
-{% block title %}Rate competencies · PathImpact{% endblock %}
+{% load static %}
+
+{% block title %}
+    {% if attempt %}
+        Edit self-assessment
+    {% else %}
+        New self-assessment
+    {% endif %}
+{% endblock %}
+
 {% block content %}
-<header class="intro"><p class="eyebrow">DATABASE FOUNDATIONS / PROTOTYPE</p><h1>{% if attempt %}Edit self-assessment{% else %}Rate your current understanding{% endif %}</h1><p>Choose one rating for each competency. These are self-ratings, not grades or a readiness prediction.</p></header>
-<section class="card narrow"><h2>Competency ratings</h2><p>All ratings are required. The scale ranges from 1 (need a walkthrough) to 5 (can explain the skill).</p>
-<form method="post" novalidate>{% csrf_token %}{{ form.as_p }}<div class="form-actions"><button type="submit">Save self-assessment</button><a class="btn quiet" href="{% if attempt %}{% url 'assessment_detail' attempt.pk %}{% else %}{% url 'assessment_index' %}{% endif %}">Cancel</a></div></form>
-</section>
+
+<link rel="stylesheet"
+      href="{% static 'accounts/assessments.css' %}?v=20261127-04">
+
+<style>
+    .assessment-create {
+        --ac-primary: #800020;
+        --ac-text: #171717;
+        --ac-muted: #71717a;
+        --ac-border: #e1e1e5;
+        --ac-soft: #f7edef;
+
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .assessment-create .ac-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .assessment-create .ac-heading h1 {
+        margin: 0 0 5px;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.3;
+        letter-spacing: -.6px;
+    }
+
+    .assessment-create .ac-heading p {
+        margin: 0;
+        color: var(--ac-muted);
+        font-size: 13px;
+    }
+
+    .assessment-create .ac-panel {
+        background: #ffffff;
+        border: 1px solid var(--ac-border);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .assessment-create .ac-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--ac-border);
+    }
+
+    .assessment-create .ac-panel-header h2 {
+        margin: 0 0 4px;
+        font-size: 16px;
+        font-weight: 650;
+    }
+
+    .assessment-create .ac-panel-header p {
+        margin: 0;
+        color: var(--ac-muted);
+        font-size: 12px;
+    }
+
+    .assessment-create .ac-progress {
+        min-width: 150px;
+    }
+
+    .assessment-create .ac-progress-label {
+        display: block;
+        margin-bottom: 7px;
+        color: var(--ac-muted);
+        font-size: 12px;
+        text-align: right;
+    }
+
+    .assessment-create .ac-progress-track {
+        height: 5px;
+        background: #eeeeef;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .assessment-create .ac-progress-fill {
+        width: 0;
+        height: 100%;
+        background: var(--ac-primary);
+        border-radius: 10px;
+        transition: width .2s ease;
+    }
+
+    .assessment-create .ac-scale {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        margin: 18px 20px;
+        padding: 14px 8px;
+        background: #f7f7f8;
+        border: 1px solid var(--ac-border);
+        border-radius: 6px;
+    }
+
+    .assessment-create .ac-scale-item {
+        padding: 0 8px;
+        text-align: center;
+        border-right: 1px solid var(--ac-border);
+    }
+
+    .assessment-create .ac-scale-item:last-child {
+        border-right: 0;
+    }
+
+    .assessment-create .ac-scale-item strong {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--ac-primary);
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .assessment-create .ac-scale-item span {
+        display: block;
+        color: #52525b;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .assessment-create .ac-form {
+        margin: 0;
+    }
+
+    .assessment-create .ac-question {
+        display: grid;
+        grid-template-columns:
+            32px minmax(0, 1fr) 260px;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+        margin: 0;
+        padding: 22px 20px;
+        border: 0;
+        border-top: 1px solid var(--ac-border);
+    }
+
+    .assessment-create .ac-question-number {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 5px;
+        background: var(--ac-soft);
+        color: var(--ac-primary);
+        font-size: 12px;
+        font-weight: 650;
+    }
+
+    .assessment-create .ac-question-content {
+        min-width: 0;
+    }
+
+    .assessment-create .ac-question-title {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--ac-text);
+        font-size: 14px;
+        font-weight: 650;
+    }
+
+    .assessment-create .ac-question-description {
+        margin: 0;
+        color: var(--ac-muted);
+        font-size: 12px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    .assessment-create .ac-rating-options {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 7px;
+    }
+
+    .assessment-create .ac-rating-option {
+        position: relative;
+        display: block;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .assessment-create .ac-rating-option input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: 0;
+        padding: 0;
+        opacity: 0;
+    }
+
+    .assessment-create .ac-rating-option span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 42px;
+        border: 1px solid #d4d4d8;
+        border-radius: 6px;
+        background: #ffffff;
+        color: #52525b;
+        font-size: 14px;
+        font-weight: 600;
+        transition: background .15s ease;
+    }
+
+    .assessment-create .ac-rating-option:hover span {
+        background: var(--ac-soft);
+        border-color: var(--ac-primary);
+        color: var(--ac-primary);
+    }
+
+    .assessment-create .ac-rating-option input:checked + span {
+        background: var(--ac-primary);
+        border-color: var(--ac-primary);
+        color: #ffffff;
+    }
+
+    .assessment-create .ac-rating-option input:focus-visible + span {
+        outline: 2px solid var(--ac-primary);
+        outline-offset: 3px;
+    }
+
+    .assessment-create .ac-question.has-error {
+        background: #fff8f8;
+    }
+
+    .assessment-create .ac-errors {
+        margin: 8px 0 0;
+        padding: 0;
+        list-style: none;
+        color: #a12838;
+        font-size: 12px;
+    }
+
+    .assessment-create .ac-error-summary {
+        margin: 16px 20px;
+        padding: 12px 14px;
+        border: 1px solid #edc8cd;
+        border-left: 3px solid #a12838;
+        border-radius: 5px;
+        background: #fff1f2;
+        color: #a12838;
+        font-size: 13px;
+    }
+
+    .assessment-create .ac-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 16px 20px;
+        border-top: 1px solid var(--ac-border);
+        background: #fafafa;
+    }
+
+    .assessment-create .ac-footer-note {
+        color: var(--ac-muted);
+        font-size: 12px;
+    }
+
+    .assessment-create .ac-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .assessment-create .ac-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 10px 18px;
+        border: 1px solid var(--ac-primary);
+        border-radius: 5px;
+        background: var(--ac-primary);
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .assessment-create .ac-button:hover {
+        background: #650019;
+        color: #ffffff;
+        text-decoration: none;
+    }
+
+    .assessment-create .ac-button-secondary {
+        background: #ffffff;
+        color: var(--ac-text);
+        border-color: var(--ac-border);
+    }
+
+    .assessment-create .ac-button-secondary:hover {
+        background: #f5f5f5;
+        color: var(--ac-text);
+    }
+
+    .assessment-create .ac-button:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    .assessment-create .ac-disclaimer {
+        margin: 14px 0 0;
+        color: var(--ac-muted);
+        font-size: 12px;
+    }
+
+    .assessment-create .ac-empty {
+        padding: 36px 20px;
+        color: var(--ac-muted);
+        text-align: center;
+    }
+
+    @media (max-width: 1100px) {
+        .assessment-create .ac-question {
+            grid-template-columns:
+                30px minmax(0, 1fr) 220px;
+            gap: 12px;
+        }
+    }
+
+    @media (max-width: 950px) {
+        .assessment-create .ac-question {
+            grid-template-columns: 30px minmax(0, 1fr);
+        }
+
+        .assessment-create .ac-question-control {
+            grid-column: 2;
+        }
+
+        .assessment-create .ac-rating-options {
+            max-width: 280px;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .assessment-create .ac-heading h1 {
+            font-size: 24px;
+        }
+
+        .assessment-create .ac-panel-header,
+        .assessment-create .ac-question,
+        .assessment-create .ac-footer {
+            padding: 16px;
+        }
+
+        .assessment-create .ac-scale {
+            margin: 14px 12px;
+            padding: 10px 2px;
+        }
+
+        .assessment-create .ac-scale-item {
+            padding: 0 4px;
+        }
+
+        .assessment-create .ac-scale-item span {
+            font-size: 10px;
+            overflow-wrap: anywhere;
+        }
+
+        .assessment-create .ac-progress {
+            width: 100%;
+        }
+
+        .assessment-create .ac-progress-label {
+            text-align: left;
+        }
+
+        .assessment-create .ac-actions {
+            width: 100%;
+        }
+
+        .assessment-create .ac-button {
+            flex: 1;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .assessment-create .ac-progress-fill,
+        .assessment-create .ac-rating-option span {
+            transition: none;
+        }
+    }
+</style>
+
+<div class="assessment-create">
+
+    <header class="ac-heading">
+        <div>
+            <h1>
+                {% if attempt %}
+                    Edit self-assessment
+                {% else %}
+                    New self-assessment
+                {% endif %}
+            </h1>
+
+            <p>Database Foundations</p>
+        </div>
+
+        <a href="{% url 'assessment_index' %}"
+           class="ac-button ac-button-secondary">
+            Back to history
+        </a>
+    </header>
+
+    <section class="ac-panel">
+
+        <header class="ac-panel-header">
+
+            <div>
+                <h2>Competency ratings</h2>
+                <p>Select one rating for each competency.</p>
+            </div>
+
+            <div class="ac-progress">
+                <span class="ac-progress-label"
+                      id="assessment-progress"
+                      aria-live="polite">
+                    0 answered
+                </span>
+
+                <div class="ac-progress-track"
+                     aria-hidden="true">
+                    <div class="ac-progress-fill"
+                         id="assessment-progress-fill">
+                    </div>
+                </div>
+            </div>
+
+        </header>
+
+        <div class="ac-scale" aria-label="Rating definitions">
+
+            <div class="ac-scale-item">
+                <strong>1</strong>
+                <span>Need a walkthrough</span>
+            </div>
+
+            <div class="ac-scale-item">
+                <strong>2</strong>
+                <span>Can do with help</span>
+            </div>
+
+            <div class="ac-scale-item">
+                <strong>3</strong>
+                <span>Usually on my own</span>
+            </div>
+
+            <div class="ac-scale-item">
+                <strong>4</strong>
+                <span>Independent</span>
+            </div>
+
+            <div class="ac-scale-item">
+                <strong>5</strong>
+                <span>Can do and explain</span>
+            </div>
+
+        </div>
+
+        <form method="post"
+              class="ac-form"
+              id="assessment-form"
+              novalidate>
+
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="ac-error-summary" role="alert">
+                    {% for error in form.non_field_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% elif form.errors %}
+                <div class="ac-error-summary" role="alert">
+                    Please review the highlighted competencies.
+                </div>
+            {% endif %}
+
+            {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+
+            {% for field in form.visible_fields %}
+
+                <div class="ac-question{% if field.errors %} has-error{% endif %}"
+                     role="group"
+                     aria-labelledby="{{ field.auto_id }}_title"
+                     aria-describedby="{{ field.auto_id }}_helptext{% if field.errors %} {{ field.auto_id }}_error{% endif %}">
+
+                    <span class="ac-question-number"
+                          aria-hidden="true">
+                        {{ forloop.counter|stringformat:"02d" }}
+                    </span>
+
+                    <div class="ac-question-content">
+
+                        <strong class="ac-question-title"
+                                id="{{ field.auto_id }}_title">
+                            {{ field.label }}
+                        </strong>
+
+                        <p class="ac-question-description"
+                           id="{{ field.auto_id }}_helptext">
+                            {{ field.help_text }}
+                        </p>
+
+                    </div>
+
+                    <div class="ac-question-control">
+
+                        <div class="ac-rating-options">
+
+                            {% for radio in field %}
+
+                                <label class="ac-rating-option"
+                                       for="{{ radio.id_for_label }}"
+                                       title="{{ radio.choice_label }}">
+
+                                    {{ radio.tag }}
+
+                                    <span>
+                                        {{ forloop.counter }}
+                                    </span>
+
+                                </label>
+
+                            {% endfor %}
+
+                        </div>
+
+                        {% if field.errors %}
+                            <ul class="ac-errors"
+                                id="{{ field.auto_id }}_error">
+
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+
+                            </ul>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <div class="ac-empty">
+                    No competencies are currently available.
+                </div>
+
+            {% endfor %}
+
+            <footer class="ac-footer">
+
+                <span class="ac-footer-note">
+                    All ratings are required.
+                </span>
+
+                <div class="ac-actions">
+
+                    <a class="ac-button ac-button-secondary"
+                       href="{% if attempt %}{% url 'assessment_detail' attempt.pk %}{% else %}{% url 'assessment_index' %}{% endif %}">
+                        Cancel
+                    </a>
+
+                    <button type="submit"
+                            class="ac-button"
+                            {% if not form.visible_fields %}disabled{% endif %}>
+
+                        {% if attempt %}
+                            Save changes
+                        {% else %}
+                            Save self-assessment
+                        {% endif %}
+
+                    </button>
+
+                </div>
+
+            </footer>
+
+        </form>
+
+    </section>
+
+    <p class="ac-disclaimer">
+        Self-assessment ratings are not official academic grades
+        or automated readiness predictions.
+    </p>
+
+</div>
+
+<script>
+    (() => {
+        const form = document.getElementById("assessment-form");
+        const label = document.getElementById("assessment-progress");
+        const fill = document.getElementById("assessment-progress-fill");
+
+        if (!form || !label || !fill) {
+            return;
+        }
+
+        const questions = Array.from(
+            form.querySelectorAll(".ac-question")
+        );
+
+        function updateProgress() {
+            const total = questions.length;
+
+            const answered = questions.filter(question =>
+                question.querySelector(
+                    'input[type="radio"]:checked'
+                )
+            ).length;
+
+            const percentage = total
+                ? (answered / total) * 100
+                : 0;
+
+            label.textContent =
+                `${answered} of ${total} answered`;
+
+            fill.style.width = `${percentage}%`;
+        }
+
+        form.addEventListener("change", updateProgress);
+
+        updateProgress();
+    })();
+</script>
+
 {% endblock %}

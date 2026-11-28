@@ -1,0 +1,331 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Competency Impacts | PathImpact{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet"
+      href="{% static 'accounts/academic.css' %}?v=07b">
+<link rel="stylesheet"
+      href="{% static 'accounts/competency_impacts.css' %}?v=07h1">
+{% endblock %}
+
+{% block content %}
+
+<div class="am-workspace ci-workspace">
+
+    <header class="ci-heading">
+
+        <div>
+            <h1>Competency Impacts</h1>
+            <p>
+                Manage competency relevance to succeeding
+                academic subjects.
+            </p>
+        </div>
+
+        <a class="ci-button"
+           href="{% url 'accounts:impact_create' %}">
+            + Add impact
+        </a>
+
+    </header>
+
+    <section class="ci-summary"
+             aria-label="Competency impact summary">
+
+        <article class="ci-summary-card">
+
+            <span class="ci-summary-label">
+                Total impacts
+            </span>
+
+            <strong class="ci-summary-value">
+                {{ total_count }}
+            </strong>
+
+            <span class="ci-summary-description">
+                Defined competency relationships
+            </span>
+
+        </article>
+
+        <article class="ci-summary-card">
+
+            <span class="ci-summary-label">
+                Affected subjects
+            </span>
+
+            <strong class="ci-summary-value">
+                {{ affected_count }}
+            </strong>
+
+            <span class="ci-summary-description">
+                Subjects with defined impacts
+            </span>
+
+        </article>
+
+        <article class="ci-summary-card">
+
+            <span class="ci-summary-label">
+                High relevance
+            </span>
+
+            <strong class="ci-summary-value">
+                {{ high_count }}
+            </strong>
+
+            <span class="ci-summary-description">
+                High-importance relationships
+            </span>
+
+        </article>
+
+    </section>
+
+    <section class="ci-panel">
+
+        <div class="ci-panel-heading">
+
+            <h2>Impact directory</h2>
+
+            <p>
+                {{ filtered_count }} relationship{{ filtered_count|pluralize }}
+            </p>
+
+        </div>
+
+        <form method="get" class="ci-toolbar">
+
+            <input type="search"
+                   name="q"
+                   value="{{ query }}"
+                   aria-label="Search impacts"
+                   placeholder="Search subjects or competencies">
+
+            <select name="program"
+                    aria-label="Academic program">
+
+                <option value="">All programs</option>
+
+                {% for program in programs %}
+
+                <option value="{{ program.pk }}"
+                    {% if selected_program == program.pk|stringformat:"s" %}
+                    selected
+                    {% endif %}>
+
+                    {{ program.code }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <select name="relevance"
+                    aria-label="Competency relevance">
+
+                <option value="">All relevance levels</option>
+
+                {% for value, label in relevance_choices %}
+
+                <option value="{{ value }}"
+                    {% if selected_relevance == value|stringformat:"s" %}
+                    selected
+                    {% endif %}>
+
+                    {{ label }}
+
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+            <button type="submit" class="ci-button">
+                Filter
+            </button>
+
+            <a class="ci-button ci-button-secondary"
+               href="{% url 'accounts:impacts' %}">
+                Reset
+            </a>
+
+        </form>
+
+        {% if page.object_list %}
+
+        <div class="ci-table-scroll">
+
+            <table class="ci-table">
+
+                <thead>
+                    <tr>
+                        <th scope="col">Prerequisite</th>
+                        <th scope="col">Competency</th>
+                        <th scope="col">Successor</th>
+                        <th scope="col">Relevance</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for item in page %}
+
+                    <tr>
+
+                        <td>
+                            <span class="ci-code">
+                                {{ item.prerequisite.prerequisite.code }}
+                            </span>
+
+                            <span class="ci-secondary">
+                                {{ item.prerequisite.prerequisite.name }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="ci-code">
+                                {{ item.subject_competency.competency.code }}
+                            </span>
+
+                            <span class="ci-secondary">
+                                {{ item.subject_competency.competency.name }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="ci-code">
+                                {{ item.prerequisite.successor.code }}
+                            </span>
+
+                            <span class="ci-secondary">
+                                {{ item.prerequisite.successor.name }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="ci-relevance ci-relevance-{{ item.relevance }}">
+                                {{ item.get_relevance_display }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="ci-actions">
+
+                                <a href="{% url 'accounts:impact_edit' item.pk %}">
+                                    Edit
+                                </a>
+
+                                <a href="{% url 'accounts:impact_delete' item.pk %}">
+                                    Remove
+                                </a>
+
+                            </div>
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="ci-empty">
+
+            {% if total_count %}
+
+                <h3>No matching impacts</h3>
+
+                <p>
+                    Try changing your search or filter options.
+                </p>
+
+                <a class="ci-button ci-button-secondary"
+                   href="{% url 'accounts:impacts' %}">
+                    Clear filters
+                </a>
+
+            {% else %}
+
+                <h3>No competency impacts yet</h3>
+
+                <p>
+                    Define a relationship between a prerequisite
+                    competency and a succeeding subject.
+                </p>
+
+                <a class="ci-button"
+                   href="{% url 'accounts:impact_create' %}">
+                    + Add impact
+                </a>
+
+            {% endif %}
+
+        </div>
+
+        {% endif %}
+
+        {% if page.has_other_pages %}
+
+        <div class="ci-pagination">
+
+            <div>
+
+                {% if page.has_previous %}
+
+                <a href="{% querystring page=page.previous_page_number %}">
+                    Previous
+                </a>
+
+                {% endif %}
+
+            </div>
+
+            <span>
+                Page {{ page.number }}
+                of {{ page.paginator.num_pages }}
+            </span>
+
+            <div>
+
+                {% if page.has_next %}
+
+                <a href="{% querystring page=page.next_page_number %}">
+                    Next
+                </a>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+    <aside class="ci-note">
+
+        <strong>Academic reference information</strong>
+
+        <br>
+
+        Competency impacts describe the relevance of prerequisite
+        competencies to succeeding subjects. These relationships
+        support academic preparation and do not determine official
+        grades or enrollment eligibility.
+
+    </aside>
+
+</div>
+
+{% endblock %}
