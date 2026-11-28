@@ -1,9 +1,6 @@
 
 from datetime import timedelta
-from functools import wraps
 
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.shortcuts import render
@@ -18,6 +15,8 @@ from assessments.models import (
     AssessmentSession,
 )
 
+from .access import administrator_required
+from django.views.decorators.cache import never_cache
 from .models import CustomUser
 from .catalog_services import build_catalog_health
 
@@ -27,21 +26,7 @@ from .catalog_services import build_catalog_health
 # =========================================================
 
 def administrator_only(view):
-
-    @login_required(login_url="accounts:login")
-    @wraps(view)
-    def wrapped(request, *args, **kwargs):
-
-        if (
-            not request.user.is_active
-            or request.user.role
-            != CustomUser.Role.ADMINISTRATOR
-        ):
-            raise PermissionDenied
-
-        return view(request, *args, **kwargs)
-
-    return wrapped
+    return never_cache(administrator_required(view))
 
 
 # =========================================================

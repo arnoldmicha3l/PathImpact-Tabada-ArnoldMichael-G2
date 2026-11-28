@@ -1,20 +1,33 @@
+
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError, transaction
 from django.shortcuts import redirect, render
+from django.views.decorators.cache import never_cache
 from django.views.decorators.debug import sensitive_post_parameters
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import (
+    require_http_methods,
+    require_safe,
+)
 
 from assessments.models import AssessmentSession
+
+from .access import (
+    active_account_required,
+    student_required,
+    administrator_required,
+)
 
 from .forms import ProfileForm, RegistrationForm
 from .models import CustomUser
 
 
-# Dashboard statistics
+# =========================================================
+# STUDENT DASHBOARD STATISTICS
+# =========================================================
 
 def _student_context(user):
+
     assessments = AssessmentSession.objects.filter(
         user=user
     ).order_by("-started_at", "-pk")
@@ -23,29 +36,40 @@ def _student_context(user):
 
     return {
         "assessment_count": assessments.count(),
+
         "completed_count": assessments.filter(
             completed_at__isnull=False
         ).count(),
+
         "latest_assessment": (
             recent_assessments[0]
             if recent_assessments
             else None
         ),
+
         "recent_assessments": recent_assessments,
     }
 
 
-# Home
+# =========================================================
+# HOME
+# =========================================================
 
+@never_cache
+@require_safe
 def home(request):
+
     if request.user.is_authenticated:
         return redirect("accounts:dashboard")
 
     return redirect("accounts:login")
 
 
-# Registration
+# =========================================================
+# REGISTRATION
+# =========================================================
 
+@never_cache
 @sensitive_post_parameters("password1", "password2")
 @require_http_methods(["GET", "POST"])
 def register(request):
@@ -54,7 +78,9 @@ def register(request):
         return redirect("accounts:dashboard")
 
     form = RegistrationForm(
-        request.POST if request.method == "POST" else None
+        request.POST
+        if request.method == "POST"
+        else None
     )
 
     if request.method == "POST" and form.is_valid():
@@ -63,12 +89,17 @@ def register(request):
         email = form.cleaned_data["email"]
 
         try:
+
             with transaction.atomic():
                 form.save()
 
         except IntegrityError as exc:
 
-            if getattr(exc.__cause__, "sqlstate", None) != "23505":
+            if getattr(
+                exc.__cause__,
+                "sqlstate",
+                None,
+            ) != "23505":
                 raise
 
             username_taken = CustomUser.objects.filter(
@@ -82,23 +113,24 @@ def register(request):
             if username_taken:
                 form.add_error(
                     "username",
-                    "This username is already taken."
+                    "This username is already taken.",
                 )
 
             if email_taken:
                 form.add_error(
                     "email",
-                    "This email is already registered."
+                    "This email is already registered.",
                 )
 
             if not username_taken and not email_taken:
                 raise
 
         else:
+
             messages.success(
                 request,
                 "Your PathImpact account was created. "
-                "You can now sign in."
+                "You can now sign in.",
             )
 
             return redirect("accounts:login")
@@ -106,111 +138,185 @@ def register(request):
     return render(
         request,
         "accounts/register.html",
-        {"form": form}
+        {"form": form},
     )
 
 
-# Role-based dashboard routing
+# =========================================================
+# ROLE-BASED DASHBOARD ROUTING
+# =========================================================
 
-@login_required(login_url="accounts:login")
-@require_http_methods(["GET"])
+@never_cache
+@active_account_required
+@require_safe
 def dashboard(request):
 
     if request.user.role == CustomUser.Role.STUDENT:
-        return redirect("accounts:student_dashboard")
+
+        return redirect(
+            "accounts:student_dashboard"
+        )
 
     if request.user.role == CustomUser.Role.ADMINISTRATOR:
-        return redirect("accounts:administrator_dashboard")
+
+        return redirect(
+            "accounts:administrator_dashboard"
+        )
 
     raise PermissionDenied
 
 
-# Student dashboard
+# =========================================================
+# STUDENT DASHBOARD
+# =========================================================
 
-@login_required(login_url="accounts:login")
-@require_http_methods(["GET"])
+@never_cache
+@student_required
+@require_safe
 def student_dashboard(request):
-
-    if request.user.role != CustomUser.Role.STUDENT:
-        raise PermissionDenied
 
     context = {
         "page_title": "Dashboard",
+
         "description": (
             "Manage your competency self-assessments."
         ),
+
         "role_view": "student",
+
         **_student_context(request.user),
     }
 
     return render(
         request,
         "accounts/dashboard.html",
-        context
+        context,
     )
 
 
-# Administrator dashboard
+# =========================================================
+# LEGACY ADMINISTRATOR DASHBOARD
+# =========================================================
 
-@login_required(login_url="accounts:login")
-@require_http_methods(["GET"])
+@never_cache
+@administrator_required
+@require_safe
 def administrator_dashboard(request):
 
-    if request.user.role != CustomUser.Role.ADMINISTRATOR:
-        raise PermissionDenied
-
-    context = {
-        "page_title": "Administrator dashboard",
-        "description": (
-            "Access your administrator account "
-            "and manage your personal profile."
-        ),
-        "role_view": "administrator",
-    }
-
-    return render(
-        request,
-        "accounts/dashboard.html",
-        context
+    return redirect(
+        "accounts:administrator_dashboard"
     )
 
 
-# User profile
+# =========================================================
+# USER PROFILE
+# =========================================================
 
-@login_required(login_url="accounts:login")
-@require_http_methods(["GET"])
+@never_cache
+@active_account_required
+@require_safe
 def profile(request):
 
     return render(
         request,
-        "accounts/profile.html"
+        "accounts/profile.html",
     )
 
 
-# Edit profile
+# =========================================================
+# EDIT PROFILE
+# =========================================================
 
-@login_required(login_url="accounts:login")
+@never_cache
+@active_account_required
 @require_http_methods(["GET", "POST"])
 def edit_profile(request):
 
-    form = ProfileForm(
-        request.POST if request.method == "POST" else None,
-        instance=request.user,
-    )
+    if request.method == "POST":
 
-    if request.method == "POST" and form.is_valid():
+        with transaction.atomic():
 
-        form.save()
+            account = CustomUser.objects.select_for_update().get(
+                pk=request.user.pk
+            )
 
-        messages.success(
-            request,
-            "Your profile was updated."
+            if not account.is_active:
+
+                raise PermissionDenied
+
+            if account.role not in CustomUser.Role.values:
+
+                raise PermissionDenied
+
+            form = ProfileForm(
+                request.POST,
+                instance=account,
+            )
+
+            if form.is_valid():
+
+                updated_account = form.save(
+                    commit=False
+                )
+
+                email = form.cleaned_data["email"]
+
+                try:
+
+                    with transaction.atomic():
+
+                        updated_account.save(
+                            update_fields=[
+                                "first_name",
+                                "last_name",
+                                "email",
+                            ]
+                        )
+
+                except IntegrityError as exc:
+
+                    if getattr(
+                        exc.__cause__,
+                        "sqlstate",
+                        None,
+                    ) != "23505":
+
+                        raise
+
+                    email_taken = CustomUser.objects.exclude(
+                        pk=account.pk
+                    ).filter(
+                        email__iexact=email
+                    ).exists()
+
+                    if not email_taken:
+
+                        raise
+
+                    form.add_error(
+                        "email",
+                        "This email is already registered.",
+                    )
+
+                else:
+
+                    messages.success(
+                        request,
+                        "Your profile was updated.",
+                    )
+
+                    return redirect(
+                        "accounts:profile"
+                    )
+
+    else:
+
+        form = ProfileForm(
+            instance=request.user
         )
-
-        return redirect("accounts:profile")
 
     return render(
         request,
         "accounts/edit_profile.html",
-        {"form": form}
+        {"form": form},
     )

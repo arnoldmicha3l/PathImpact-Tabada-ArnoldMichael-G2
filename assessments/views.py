@@ -1,10 +1,9 @@
 from .result_services import generate_assessment_results
 
-from functools import wraps
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.views.decorators.cache import never_cache
+from accounts.access import student_required
 from django.db import transaction
 from django.db.models import Avg, Count
 
@@ -32,21 +31,7 @@ from .models import (
 
 
 def student_only(view):
-
-    @login_required(login_url="accounts:login")
-    @wraps(view)
-    def wrapped(request, *args, **kwargs):
-
-        if (
-            not request.user.is_active
-            or request.user.role != "student"
-        ):
-
-            raise PermissionDenied
-
-        return view(request, *args, **kwargs)
-
-    return wrapped
+    return never_cache(student_required(view))
 
 
 def own(request):
