@@ -20,6 +20,16 @@ from .academic_forms import ProgramForm, SubjectForm
 from .administrator_views import administrator_only
 
 
+def lock_academic_catalog():
+
+    list(
+        AcademicProgram.objects
+        .select_for_update()
+        .order_by("pk")
+        .values_list("pk", flat=True)
+    )
+
+
 def paginate(request, queryset):
 
     paginator = Paginator(queryset, 10)
@@ -40,6 +50,7 @@ def programs(request):
     ).order_by("code", "pk")
 
     if query:
+
         records = records.filter(
             Q(code__icontains=query)
             | Q(name__icontains=query)
@@ -87,22 +98,30 @@ def subjects(request):
     )
 
     if query:
+
         records = records.filter(
             Q(code__icontains=query)
             | Q(name__icontains=query)
         )
 
-    if program.isdecimal() and len(program) <= 10:
+    if (
+        program.isascii()
+        and program.isdecimal()
+        and len(program) <= 18
+    ):
+
         records = records.filter(
             program_id=int(program)
         )
 
     if year in ["1", "2", "3", "4"]:
+
         records = records.filter(
             year_level=int(year)
         )
 
     if semester in ["1", "2", "3"]:
+
         records = records.filter(
             semester=int(semester)
         )
@@ -143,59 +162,65 @@ def save_record(
     list_url,
 ):
 
-    instance = (
-        get_object_or_404(model, pk=pk)
-        if pk is not None
-        else None
-    )
+    if request.method == "POST":
 
-    form = form_class(
-        request.POST if request.method == "POST" else None,
-        instance=instance,
-    )
+        with transaction.atomic():
 
-    if request.method == "POST" and form.is_valid():
+            lock_academic_catalog()
 
-        try:
+            instance = (
+                get_object_or_404(
+                    model.objects.select_for_update(),
+                    pk=pk,
+                )
+                if pk is not None
+                else None
+            )
 
-            with transaction.atomic():
+            form = form_class(
+                request.POST,
+                instance=instance,
+            )
 
-                if instance is not None:
+            if form.is_valid():
 
-                    locked = get_object_or_404(
-                        model.objects.select_for_update(),
-                        pk=instance.pk,
+                try:
+
+                    with transaction.atomic():
+
+                        form.save()
+
+                except IntegrityError:
+
+                    form.add_error(
+                        None,
+                        "The record could not be saved. "
+                        "Check for duplicate or conflicting "
+                        "information.",
                     )
 
-                    form.instance = locked
+                else:
 
-                    for field in form.Meta.fields:
-                        setattr(
-                            locked,
-                            field,
-                            form.cleaned_data[field],
-                        )
+                    messages.success(
+                        request,
+                        f"{label} updated successfully."
+                        if pk is not None
+                        else f"{label} created successfully.",
+                    )
 
-                form.save()
+                    return redirect(list_url)
 
-        except IntegrityError:
+    else:
 
-            form.add_error(
-                None,
-                "The record could not be saved. "
-                "Check for duplicate or conflicting information.",
-            )
+        instance = (
+            get_object_or_404(model, pk=pk)
+            if pk is not None
+            else None
+        )
 
-        else:
-
-            messages.success(
-                request,
-                f"{label} updated successfully."
-                if instance
-                else f"{label} created successfully.",
-            )
-
-            return redirect(list_url)
+        form = form_class(
+            instance=instance,
+        )
 
     return render(
         request,
@@ -204,7 +229,7 @@ def save_record(
             "form": form,
             "heading": (
                 f"Edit {label.lower()}"
-                if instance
+                if pk is not None
                 else f"Add {label.lower()}"
             ),
             "instance": instance,
@@ -230,17 +255,7 @@ def program_edit(request, pk=None):
 
 @administrator_only
 @require_http_methods(["GET", "POST"])
-@transaction.atomic
 def subject_edit(request, pk=None):
-
-    if request.method == "POST":
-
-        list(
-            AcademicProgram.objects
-            .select_for_update()
-            .order_by("pk")
-            .values_list("pk", flat=True)
-        )
 
     return save_record(
         request,
@@ -252,6 +267,34 @@ def subject_edit(request, pk=None):
     )
 
 
+def protected_record_reason(record):
+
+    if isinstance(record, AcademicProgram):
+
+        if record.code == "BSIT":
+
+            return (
+                "The BSIT program is required by "
+                "the current self-assessment configuration "
+                "and cannot be deleted."
+            )
+
+    if isinstance(record, Subject):
+
+        if (
+            record.program.code == "BSIT"
+            and record.code == "DB-FND"
+        ):
+
+            return (
+                "This subject is required by the current "
+                "self-assessment configuration "
+                "and cannot be deleted."
+            )
+
+    return None
+
+
 def delete_record(
     request,
     pk,
@@ -260,18 +303,29 @@ def delete_record(
     list_url,
 ):
 
-    record = get_object_or_404(model, pk=pk)
-
     if request.method == "POST":
 
         try:
 
             with transaction.atomic():
 
+                lock_academic_catalog()
+
                 record = get_object_or_404(
                     model.objects.select_for_update(),
                     pk=pk,
                 )
+
+                reason = protected_record_reason(record)
+
+                if reason:
+
+                    messages.error(
+                        request,
+                        reason,
+                    )
+
+                    return redirect(list_url)
 
                 record.delete()
 
@@ -298,6 +352,11 @@ def delete_record(
             )
 
         return redirect(list_url)
+
+    record = get_object_or_404(
+        model,
+        pk=pk,
+    )
 
     return render(
         request,
