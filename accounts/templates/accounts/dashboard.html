@@ -1,33 +1,381 @@
+
 {% extends "accounts/base.html" %}
 {% load static %}
-{% block title %}{% if user.role == "student" %}Student dashboard{% else %}Administrator dashboard{% endif %}{% endblock %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
 {% block content %}
-<link rel="stylesheet" href="{% static 'accounts/contour-fold.css' %}">
+
+<link rel="stylesheet"
+      href="{% static 'accounts/contour-fold.css' %}">
+
 <div class="cf">
-<div class="cf-spread">
-  <section class="cf-panel" aria-labelledby="dashboard-heading">
-    <p class="cf-label">{{ user.get_role_display }}</p>
-    {% if user.role == "student" %}
-      <h1 id="dashboard-heading">Welcome, {{ user.first_name|default:user.username }}.</h1>
-      <p>View or update your account information as you prepare for future academic readiness activities.</p>
-    {% else %}
-      <h1 id="dashboard-heading">Administrator workspace</h1>
-      <p>You’re signed in as {{ user.username }}. You can view your own account information below.</p>
-    {% endif %}
-    <div class="actions">
-      <a class="btn" href="{% url 'accounts:profile' %}">View my profile</a>
-      {% if user.role != "student" and user.is_staff %}
-        <a class="btn btn-light" href="{% url 'admin:index' %}">Open Django administration</a>
-      {% endif %}
+
+    <div class="cf-spread">
+
+        <section class="cf-panel"
+                 aria-labelledby="dashboard-heading">
+
+            {% if role_view == "student" %}
+
+                <p class="cf-label">Student workspace</p>
+
+                <h1 id="dashboard-heading">
+                    Welcome, {{ user.first_name|default:user.username }}.
+                </h1>
+
+                <p>
+                    Review your academic competencies,
+                    complete self-assessments and monitor
+                    your progress.
+                </p>
+
+                <div class="actions">
+
+                    <a class="btn"
+                       href="{% url 'assessment_index' %}">
+                        Open self-assessments
+                    </a>
+
+                    <a class="btn"
+                       href="{% url 'accounts:profile' %}">
+                        View my profile
+                    </a>
+
+                </div>
+
+            {% else %}
+
+                <p class="cf-label">
+                    Administrator workspace
+                </p>
+
+                <h1 id="dashboard-heading">
+                    Administrator dashboard
+                </h1>
+
+                <p>
+                    Monitor academic reference data
+                    and student assessment activity.
+                </p>
+
+                <div class="actions">
+
+                    <a class="btn"
+                       href="{% url 'accounts:profile' %}">
+                        View my profile
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+        <aside class="cf-map">
+
+            <figure class="cf-fold" aria-hidden="true">
+
+                <svg viewBox="0 0 440 256"
+                     fill="none"
+                     focusable="false">
+
+                    <path fill="#fffdf7"
+                          d="M25 42 151 22 282 43 415 23v180l-133 25-131-21-126 23z"/>
+
+                    <path fill="#122735"
+                          d="m35 50 116-18 131 21 123-20v161l-123 24-131-21-116 22z"/>
+
+                    <path stroke="#355862"
+                          d="M151 32v165M282 53v165M48 104c56-52 93 20 143 2s82-48 128-23 65 1 76-14M48 116c56-52 93 20 143 2s82-48 128-23 65 1 76-14M48 137c56-52 93 20 143 2s82-48 128-23 65 1 76-14"/>
+
+                    <path stroke="#90b8ab"
+                          stroke-dasharray="3 6"
+                          d="m236 138 36 38 89-12m-85-30 31-25 64-7"/>
+
+                    <path class="cf-route"
+                          pathLength="1"
+                          stroke="#a8e8ce"
+                          stroke-width="3"
+                          stroke-linecap="round"
+                          d="M91 174h40l48-36h57l40-4 43-9"/>
+
+                    <path class="cf-bookmark"
+                          fill="#e7b47c"
+                          d="M82 150h16v31l-8-5-8 5z"/>
+
+                    <path fill="#fffdf7"
+                          stroke="#a8e8ce"
+                          stroke-width="2"
+                          d="M287 112q18-8 32 0 14-8 32 0v32q-18-8-32 0-14-8-32 0zm32 0v32"/>
+
+                    <path stroke="#597878"
+                          stroke-linecap="round"
+                          d="m294 119 17 1m-17 6 17 1m16-7 17-1m-17 8 17-1"/>
+
+                </svg>
+
+            </figure>
+
+            <p>Academic pathways</p>
+
+        </aside>
+
     </div>
-  </section>
-  <aside class="cf-map">{% include "accounts/contour-fold.html" %}<p>{% if user.role == "student" %}Your academic pathway{% else %}Account reference desk{% endif %}</p></aside>
+
+    <section class="cf-panel cf-secondary"
+             aria-labelledby="overview-heading">
+
+        <h2 id="overview-heading">
+            Overview
+        </h2>
+
+        <div class="pi-dashboard-stats">
+
+            {% for number, label, value in stats %}
+
+                <article class="pi-dashboard-stat">
+
+                    <span class="pi-dashboard-label">
+                        {{ label }}
+                    </span>
+
+                    <strong class="pi-dashboard-value">
+                        {{ value }}
+                    </strong>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+    {% if role_view == "student" %}
+
+        <section class="cf-panel cf-secondary"
+                 aria-labelledby="recent-heading">
+
+            <div class="pi-dashboard-heading">
+
+                <div>
+
+                    <h2 id="recent-heading">
+                        Recent assessments
+                    </h2>
+
+                    <p>
+                        Review your latest self-assessment records.
+                    </p>
+
+                </div>
+
+                <a class="btn"
+                   href="{% url 'assessment_create' %}">
+                    New self-assessment
+                </a>
+
+            </div>
+
+            {% if recent_assessments %}
+
+                <div class="pi-dashboard-table-wrap">
+
+                    <table class="pi-dashboard-table">
+
+                        <thead>
+                            <tr>
+                                <th scope="col">Assessment</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for attempt in recent_assessments %}
+
+                                <tr>
+
+                                    <td>
+                                        Attempt {{ attempt.pk }}
+                                    </td>
+
+                                    <td>
+                                        {{ attempt.started_at|date:"M d, Y" }}
+                                    </td>
+
+                                    <td>
+
+                                        {% if attempt.completed_at %}
+                                            Completed
+                                        {% else %}
+                                            In progress
+                                        {% endif %}
+
+                                    </td>
+
+                                    <td>
+
+                                        <a href="{% url 'assessment_detail' attempt.pk %}">
+                                            View details
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="pi-dashboard-empty">
+
+                    <h3>No assessments yet</h3>
+
+                    <p>
+                        Complete your first competency
+                        self-assessment to begin.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    {% else %}
+
+        <section class="cf-panel cf-secondary">
+
+            <h2>Assessment activity</h2>
+
+            <div class="pi-dashboard-stat">
+
+                <span class="pi-dashboard-label">
+                    Completed student assessments
+                </span>
+
+                <strong class="pi-dashboard-value">
+                    {{ completed_count }}
+                </strong>
+
+            </div>
+
+            <p>
+                This overview contains aggregate information.
+                Individual student assessment responses remain private.
+            </p>
+
+        </section>
+
+    {% endif %}
+
 </div>
-{% if user.role == "student" %}
-<section class="cf-panel cf-secondary">
-  <h2>What comes next</h2>
-  <p>Competency self-assessment and readiness analysis are planned for later phases.</p>
-</section>
-{% endif %}
-</div>
+
+<style>
+
+    .pi-dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(
+            auto-fit, minmax(150px, 1fr)
+        );
+        gap: 16px;
+        margin-top: 20px;
+    }
+
+    .pi-dashboard-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px;
+        border: 1px solid #dce4df;
+        border-radius: 8px;
+        background: #ffffff;
+    }
+
+    .pi-dashboard-label {
+        color: #53665f;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .pi-dashboard-value {
+        color: #195446;
+        font-size: 30px;
+        line-height: 1.2;
+    }
+
+    .pi-dashboard-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .pi-dashboard-heading h2 {
+        margin-bottom: 6px;
+    }
+
+    .pi-dashboard-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .pi-dashboard-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    .pi-dashboard-table th,
+    .pi-dashboard-table td {
+        padding: 14px 12px;
+        border-bottom: 1px solid #dce4df;
+        white-space: nowrap;
+    }
+
+    .pi-dashboard-table th {
+        background: #f3f6f4;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .pi-dashboard-empty {
+        padding: 28px 16px;
+        text-align: center;
+        border: 1px dashed #b7cec2;
+        border-radius: 8px;
+    }
+
+    .pi-dashboard-empty h3 {
+        margin-bottom: 8px;
+    }
+
+    @media (max-width: 600px) {
+
+        .pi-dashboard-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .pi-dashboard-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+    }
+
+</style>
+
 {% endblock %}
