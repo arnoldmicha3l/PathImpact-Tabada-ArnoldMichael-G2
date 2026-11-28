@@ -11,6 +11,7 @@ from assessments.models import (
 class ProgramForm(forms.ModelForm):
 
     class Meta:
+
         model = AcademicProgram
 
         fields = [
@@ -29,8 +30,10 @@ class ProgramForm(forms.ModelForm):
             ),
             "name": forms.TextInput(
                 attrs={
-                    "placeholder":
-                    "Bachelor of Science in Information Technology"
+                    "placeholder": (
+                        "Bachelor of Science in "
+                        "Information Technology"
+                    )
                 }
             ),
         }
@@ -39,13 +42,33 @@ class ProgramForm(forms.ModelForm):
 
         code = self.cleaned_data["code"].strip().upper()
 
+        if self.instance.pk:
+
+            original_code = (
+                AcademicProgram.objects
+                .filter(pk=self.instance.pk)
+                .values_list("code", flat=True)
+                .first()
+            )
+
+            if original_code == "BSIT" and code != "BSIT":
+
+                raise forms.ValidationError(
+                    "The BSIT program code is required "
+                    "by the current self-assessment "
+                    "configuration and cannot be changed.",
+                    code="protected_program_code",
+                )
+
         records = AcademicProgram.objects.exclude(
             pk=self.instance.pk
         )
 
         if records.filter(code__iexact=code).exists():
+
             raise forms.ValidationError(
-                "This program code already exists."
+                "This program code already exists.",
+                code="duplicate_program_code",
             )
 
         return code
@@ -59,8 +82,10 @@ class ProgramForm(forms.ModelForm):
         )
 
         if records.filter(name__iexact=name).exists():
+
             raise forms.ValidationError(
-                "This program name already exists."
+                "This program name already exists.",
+                code="duplicate_program_name",
             )
 
         return name
@@ -69,6 +94,7 @@ class ProgramForm(forms.ModelForm):
 class SubjectForm(forms.ModelForm):
 
     class Meta:
+
         model = Subject
 
         fields = [
@@ -95,8 +121,9 @@ class SubjectForm(forms.ModelForm):
             ),
             "name": forms.TextInput(
                 attrs={
-                    "placeholder":
-                    "e.g. Information Management 1"
+                    "placeholder": (
+                        "e.g. Information Management 1"
+                    )
                 }
             ),
             "units": forms.NumberInput(
@@ -108,9 +135,11 @@ class SubjectForm(forms.ModelForm):
         }
 
     def clean_code(self):
+
         return self.cleaned_data["code"].strip().upper()
 
     def clean_name(self):
+
         return self.cleaned_data["name"].strip()
 
     def clean(self):
@@ -120,27 +149,73 @@ class SubjectForm(forms.ModelForm):
         program = cleaned.get("program")
         code = cleaned.get("code")
 
-        if (
-            program
-            and self.instance.pk
-            and program.pk != self.instance.program_id
-        ):
+        original = None
 
-            has_prerequisites = (
-                SubjectPrerequisite.objects.filter(
-                    prerequisite_id=self.instance.pk
-                ).exists()
-                or SubjectPrerequisite.objects.filter(
-                    successor_id=self.instance.pk
-                ).exists()
+        if self.instance.pk:
+
+            original = (
+                Subject.objects.select_related("program")
+                .filter(pk=self.instance.pk)
+                .first()
             )
 
-            if has_prerequisites:
-                self.add_error(
-                    "program",
-                    "Remove prerequisite relationships "
-                    "before changing the program.",
+        if original is not None:
+
+            is_protected_subject = (
+                original.program.code == "BSIT"
+                and original.code == "DB-FND"
+            )
+
+            if is_protected_subject:
+
+                if code and code != "DB-FND":
+
+                    self.add_error(
+                        "code",
+                        forms.ValidationError(
+                            "This subject code is required "
+                            "by the current self-assessment "
+                            "configuration and cannot be changed.",
+                            code="protected_subject_code",
+                        ),
+                    )
+
+                if (
+                    program
+                    and program.pk != original.program_id
+                ):
+
+                    self.add_error(
+                        "program",
+                        forms.ValidationError(
+                            "The current self-assessment "
+                            "subject cannot be moved "
+                            "to another academic program.",
+                            code="protected_subject_program",
+                        ),
+                    )
+
+            if (
+                program
+                and program.pk != original.program_id
+            ):
+
+                has_prerequisites = (
+                    SubjectPrerequisite.objects.filter(
+                        prerequisite_id=original.pk
+                    ).exists()
+                    or SubjectPrerequisite.objects.filter(
+                        successor_id=original.pk
+                    ).exists()
                 )
+
+                if has_prerequisites:
+
+                    self.add_error(
+                        "program",
+                        "Remove prerequisite relationships "
+                        "before changing the program.",
+                    )
 
         if program and code:
 
@@ -150,10 +225,14 @@ class SubjectForm(forms.ModelForm):
             ).exclude(pk=self.instance.pk)
 
             if duplicate.exists():
+
                 self.add_error(
                     "code",
-                    "This subject code already exists "
-                    "in the program.",
+                    forms.ValidationError(
+                        "This subject code already exists "
+                        "in the program.",
+                        code="duplicate_subject_code",
+                    ),
                 )
 
         return cleaned
