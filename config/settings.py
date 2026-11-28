@@ -4,12 +4,18 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 
+# ============================================================
+# 01 | BASE DIRECTORY AND ENVIRONMENT
+# ============================================================
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env", interpolate=False)
 
 
-# Security configuration
+# ============================================================
+# 02 | SECURITY CONFIGURATION
+# ============================================================
 
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
@@ -17,13 +23,72 @@ DEBUG = os.environ.get(
     "DJANGO_DEBUG", "False"
 ).lower() == "true"
 
+PRODUCTION_MODE = os.environ.get(
+    "DJANGO_PRODUCTION", "False"
+).lower() == "true"
+
 ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
+    host.strip()
+    for host in os.environ.get(
+        "DJANGO_ALLOWED_HOSTS",
+        "127.0.0.1,localhost",
+    ).split(",")
+    if host.strip()
+]
+
+if PRODUCTION_MODE:
+    DEBUG = False
+
+
+# HTTPS security
+
+SECURE_SSL_REDIRECT = PRODUCTION_MODE
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+X_FRAME_OPTIONS = "DENY"
+
+
+# Session security
+
+SESSION_COOKIE_SECURE = PRODUCTION_MODE
+
+SESSION_COOKIE_HTTPONLY = True
+
+SESSION_COOKIE_SAMESITE = "Lax"
+
+
+# CSRF security
+
+CSRF_COOKIE_SECURE = PRODUCTION_MODE
+
+CSRF_COOKIE_SAMESITE = "Lax"
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get(
+        "DJANGO_CSRF_TRUSTED_ORIGINS", ""
+    ).split(",")
+    if origin.strip()
 ]
 
 
-# Application configuration
+# HTTP Strict Transport Security
+
+SECURE_HSTS_SECONDS = (
+    int(os.environ.get("DJANGO_HSTS_SECONDS", "0"))
+    if PRODUCTION_MODE
+    else 0
+)
+
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+
+SECURE_HSTS_PRELOAD = False
+
+
+# ============================================================
+# 03 | APPLICATION CONFIGURATION
+# ============================================================
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -39,7 +104,9 @@ INSTALLED_APPS = [
 ]
 
 
-# Middleware
+# ============================================================
+# 04 | MIDDLEWARE
+# ============================================================
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -52,14 +119,18 @@ MIDDLEWARE = [
 ]
 
 
-# URL configuration
+# ============================================================
+# 05 | URL CONFIGURATION
+# ============================================================
 
 ROOT_URLCONF = "config.urls"
 
 WSGI_APPLICATION = "config.wsgi.application"
 
 
-# Templates
+# ============================================================
+# 06 | TEMPLATE CONFIGURATION
+# ============================================================
 
 TEMPLATES = [
     {
@@ -77,7 +148,9 @@ TEMPLATES = [
 ]
 
 
-# PostgreSQL / Supabase database
+# ============================================================
+# 07 | POSTGRESQL DATABASE
+# ============================================================
 
 DATABASES = {
     "default": {
@@ -97,7 +170,9 @@ DATABASES = {
 }
 
 
-# Authentication
+# ============================================================
+# 08 | AUTHENTICATION
+# ============================================================
 
 AUTH_USER_MODEL = "accounts.CustomUser"
 
@@ -108,7 +183,9 @@ LOGIN_REDIRECT_URL = "accounts:dashboard"
 LOGOUT_REDIRECT_URL = "accounts:login"
 
 
-# Password validation
+# ============================================================
+# 09 | PASSWORD VALIDATION
+# ============================================================
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -138,7 +215,9 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
+# ============================================================
+# 10 | INTERNATIONALIZATION
+# ============================================================
 
 LANGUAGE_CODE = "en-us"
 
@@ -149,17 +228,42 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files
+# ============================================================
+# 11 | STATIC FILES
+# ============================================================
 
 STATIC_URL = "static/"
 
 
-# Email configuration
+# ============================================================
+# 12 | EMAIL CONFIGURATION
+# ============================================================
 
-MAILERS = {
-    "default": {
-        "BACKEND": (
-            "django.core.mail.backends.console.EmailBackend"
-        ),
-    },
-}
+if PRODUCTION_MODE:
+    MAILERS = {
+        "default": {
+            "BACKEND": (
+                "django.core.mail.backends.smtp.EmailBackend"
+            ),
+            "HOST": os.environ.get("EMAIL_HOST", ""),
+            "PORT": int(
+                os.environ.get("EMAIL_PORT", "587")
+            ),
+            "USERNAME": os.environ.get(
+                "EMAIL_HOST_USER", ""
+            ),
+            "PASSWORD": os.environ.get(
+                "EMAIL_HOST_PASSWORD", ""
+            ),
+            "USE_TLS": True,
+        },
+    }
+
+else:
+    MAILERS = {
+        "default": {
+            "BACKEND": (
+                "django.core.mail.backends.console.EmailBackend"
+            ),
+        },
+    }
